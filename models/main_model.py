@@ -4,15 +4,16 @@ import json
 from datetime import datetime
 from utility.logger_super import LoggerSuper
 from models.decument import Document
+from env import *
 import logging
 
 
 class MainModel(LoggerSuper):
-    _USER = 'http_services'
-    _PASSWORD = 'lk93295841lk'
-    _SERVER = '192.168.19.204'
-    _GET_DOCS_ROUTE = '/trade2016donate/hs/storehouse/get_storage_tasks'
-    _API_KEY = 'test_key'
+    _USER = USER
+    _PASSWORD = PASSWORD
+    _SERVER = SERVER
+    _GET_DOCS_ROUTE = GET_DOCS_ROUTE
+    _API_KEY = API_KEY
 
     logger = logging.getLogger('MainModel')
     def __init__(self):
