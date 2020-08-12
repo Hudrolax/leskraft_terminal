@@ -11,6 +11,7 @@ def main():
     main_model = MainModel()
     main_controller = MainController(main_model)
 
+
     app.exec()
 
 if __name__ == '__main__':
