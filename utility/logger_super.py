@@ -1,7 +1,7 @@
 import logging
 
 
-class LoggerSuper:
+class LoggerSuper():
     """
     Cуперкласс для всех логгированных классов.
     """

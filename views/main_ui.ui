@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1229</width>
-    <height>1024</height>
+    <width>1024</width>
+    <height>768</height>
    </rect>
   </property>
   <property name="font">
@@ -29,97 +29,120 @@ color: white
 </string>
   </property>
   <widget class="QWidget" name="centralwidget">
-   <widget class="QTableWidget" name="tbl1">
-    <property name="geometry">
-     <rect>
-      <x>90</x>
-      <y>70</y>
-      <width>971</width>
-      <height>301</height>
-     </rect>
-    </property>
-    <property name="showGrid">
-     <bool>true</bool>
-    </property>
-    <property name="gridStyle">
-     <enum>Qt::SolidLine</enum>
-    </property>
-    <property name="sortingEnabled">
-     <bool>false</bool>
-    </property>
-    <property name="wordWrap">
-     <bool>true</bool>
-    </property>
-    <property name="cornerButtonEnabled">
-     <bool>true</bool>
-    </property>
-    <property name="rowCount">
-     <number>5</number>
-    </property>
-    <property name="columnCount">
-     <number>5</number>
-    </property>
-    <attribute name="horizontalHeaderVisible">
-     <bool>false</bool>
-    </attribute>
-    <attribute name="verticalHeaderVisible">
-     <bool>false</bool>
-    </attribute>
-    <row/>
-    <row/>
-    <row/>
-    <row/>
-    <row/>
-    <column/>
-    <column/>
-    <column/>
-    <column/>
-    <column/>
-    <item row="0" column="0">
-     <property name="text">
-      <string/>
-     </property>
-     <property name="background">
-      <brush brushstyle="NoBrush">
-       <color alpha="255">
-        <red>0</red>
-        <green>0</green>
-        <blue>0</blue>
-       </color>
-      </brush>
-     </property>
+   <layout class="QVBoxLayout" name="verticalLayout">
+    <item>
+     <widget class="QTableWidget" name="tbl1">
+      <property name="layoutDirection">
+       <enum>Qt::LeftToRight</enum>
+      </property>
+      <property name="showGrid">
+       <bool>true</bool>
+      </property>
+      <property name="gridStyle">
+       <enum>Qt::SolidLine</enum>
+      </property>
+      <property name="sortingEnabled">
+       <bool>false</bool>
+      </property>
+      <property name="wordWrap">
+       <bool>true</bool>
+      </property>
+      <property name="cornerButtonEnabled">
+       <bool>true</bool>
+      </property>
+      <property name="rowCount">
+       <number>5</number>
+      </property>
+      <property name="columnCount">
+       <number>5</number>
+      </property>
+      <attribute name="horizontalHeaderVisible">
+       <bool>false</bool>
+      </attribute>
+      <attribute name="verticalHeaderVisible">
+       <bool>false</bool>
+      </attribute>
+      <row/>
+      <row/>
+      <row/>
+      <row/>
+      <row/>
+      <column/>
+      <column/>
+      <column/>
+      <column/>
+      <column/>
+      <item row="0" column="0">
+       <property name="text">
+        <string/>
+       </property>
+       <property name="background">
+        <brush brushstyle="NoBrush">
+         <color alpha="255">
+          <red>0</red>
+          <green>0</green>
+          <blue>0</blue>
+         </color>
+        </brush>
+       </property>
+      </item>
+      <item row="2" column="0">
+       <property name="text">
+        <string/>
+       </property>
+      </item>
+      <item row="2" column="1">
+       <property name="text">
+        <string/>
+       </property>
+      </item>
+     </widget>
     </item>
-    <item row="2" column="0">
-     <property name="text">
-      <string/>
-     </property>
+    <item>
+     <layout class="QHBoxLayout" name="horizontalLayout">
+      <item>
+       <spacer name="horizontalSpacer">
+        <property name="orientation">
+         <enum>Qt::Horizontal</enum>
+        </property>
+        <property name="sizeHint" stdset="0">
+         <size>
+          <width>40</width>
+          <height>20</height>
+         </size>
+        </property>
+       </spacer>
+      </item>
+      <item>
+       <widget class="QPushButton" name="get_btn">
+        <property name="text">
+         <string>get</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <spacer name="horizontalSpacer_2">
+        <property name="orientation">
+         <enum>Qt::Horizontal</enum>
+        </property>
+        <property name="sizeHint" stdset="0">
+         <size>
+          <width>40</width>
+          <height>20</height>
+         </size>
+        </property>
+       </spacer>
+      </item>
+     </layout>
     </item>
-    <item row="2" column="1">
-     <property name="text">
-      <string/>
-     </property>
-    </item>
-   </widget>
-   <widget class="QPushButton" name="get_btn">
-    <property name="geometry">
-     <rect>
-      <x>480</x>
-      <y>400</y>
-      <width>111</width>
-      <height>31</height>
-     </rect>
-    </property>
-    <property name="text">
-     <string>get</string>
-    </property>
-   </widget>
+   </layout>
   </widget>
   <widget class="QMenuBar" name="menubar">
    <property name="geometry">
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>1229</width>
+     <width>1024</width>
      <height>25</height>
     </rect>
    </property>
