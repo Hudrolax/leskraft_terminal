@@ -132,3 +132,4 @@ dmypy.json
 # Pyre type checker
 .pyre/
 /base.sqlite
+/leskraft_terminal.txt

@@ -3,6 +3,16 @@ from utility.util import value_filled
 
 class DocumentTableString:
     def __init__(self, doc_link, num, nomenclature_code, amount, status, cancelled, reason_for_cancellation):
+        """
+        Класс описывает строку документа
+        :param doc_link: тип строка. Ссылка на документ.
+        :param num: тип число целое. Номер строки.
+        :param nomenclature_code: тип строка. Код номенклатуры.
+        :param amount: тип число float. Количество.
+        :param status: тип строка. Статус строки (НаИсполнение, ВРаботе, Выполнено)
+        :param cancelled: тип булево. Признак отмены строки.
+        :param reason_for_cancellation: тип строка. Причина отмены.
+        """
         if not isinstance(doc_link, str):
             raise TypeError(f'DocumentTableString init: doc_link must be str type!')
         self.doc_link = doc_link
@@ -18,7 +28,24 @@ class Document:
     DATE_FORMAT = '%d.%m.%Y %H:%M:%S'
     DATE_FORMAT_SQL = '%Y-%m-%d %H:%M:%S'
 
-    def __init__(self, link, num, date, date_sending, type, storage, status, execute_to, team_leader, team_number, start_time, end_time, destination, autos_number):
+    def __init__(self, link, num, date, date_sending, type, storage, status, execute_to, team_leader, team_number, start_time, end_time, destination, autos_number, table):
+        """
+        :param link: тип строка. Цифровое представление ссылки на документ (как в QR коде)
+        :param num: тип строка. Номер документа.
+        :param date: тип дата. Дата документа.
+        :param date_sending: тип дата. Дата отправки на терминал.
+        :param type: тип строка. Тип (вид) документа (Отгрузка, Сборка, Приемка, ВнутреннееПеремещение)
+        :param storage: тип Строка. Склад.
+        :param status: тип строка. Статус документа (НаИсполнение, ВРаботе, Выполнено)
+        :param execute_to: тип дата. Дата, до которой задание должно быть выполнено.
+        :param team_leader: тип строка. ФИО кладовщика, чья команда взяла задание.
+        :param team_number: тип строка. Номер документа ЛК_ФормированиеСкладскойБригады
+        :param start_time: тип дата. Дата начала исполнения задания.
+        :param end_time: тип дата. Дата окончания исполнения задания.
+        :param destination: тип строка. Куда грузить (Клиент, Склад, Место хранения)
+        :param autos_number: тип строка. Номер машины, куда грузить.
+        :param table: тип DocumentTableString. табличная часть документа.
+        """
         self._link = link
         self.num = num
         self._date = self._date_setter(date)
@@ -33,6 +60,7 @@ class Document:
         self._end_time = self._date_setter(end_time)
         self.destination = destination
         self.autos_number = autos_number
+        self.table = None
 
     def get_num_str(self):
         try:

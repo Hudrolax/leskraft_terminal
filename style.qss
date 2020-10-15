@@ -1,7 +1,16 @@
 QMainWindow{
     background-color: #3C3F41;
-    font: 12pt \"Consolas\";
-    color: #F8F8F2;
+}
+QDialog#doc_form{
+    background-color: #769782;
+}
+QDialog#doc_form > QLabel{
+    color: black;
+    font: bold 12pt \"Consolas\";
+}
+QDialog#doc_form > QLabel#doc_name{
+    color: black;
+    font: bold 18pt \"Consolas\";
 }
 QTableWidget{
     background-color: #272822;
