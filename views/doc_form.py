@@ -1,8 +1,9 @@
 from views.doc_form_ui import Ui_doc_form
 from PyQt5.QtGui import QFont
-from PyQt5.QtCore import Qt
-from PyQt5.QtWidgets import QDialog, QApplication
+from PyQt5.QtCore import Qt, pyqtSlot
+from PyQt5.QtWidgets import QDialog, QApplication, QTableWidgetItem, QCheckBox, QHBoxLayout, QWidget, QLineEdit
 from utility.logger_super import LoggerSuper
+from time import sleep
 import logging
 
 
@@ -10,7 +11,7 @@ class GUI_Doc_Window(Ui_doc_form, LoggerSuper):
     logger = logging.getLogger('Document_Form')
     def custom_setup(self, window):
         self.doc_tbl.setRowCount(1)
-        self.doc_tbl.setColumnCount(7)
+        self.doc_tbl.setColumnCount(5)
 
         window.resize(1200, 768)
         self.init_GUI = True
@@ -39,6 +40,7 @@ class DocumentWindow(QDialog):
         self.showNormal()
         self.center_on_screen()
         self.fill_header()
+        self.fill_table()
 
     def center_on_screen(self):
         resolution = QApplication.desktop().availableGeometry()
@@ -48,7 +50,7 @@ class DocumentWindow(QDialog):
     def fill_header(self):
         if not self.ui.init_GUI:
             return
-        doc = self.model
+        doc = self.model.doc
         self.ui.doc_name.setText(str(doc))
         self.ui.storage.setText(str(doc.storage))
         self.ui.date_sending.setText(doc.get_date_sending_str())
@@ -57,11 +59,88 @@ class DocumentWindow(QDialog):
         self.ui.autos_number.setText(doc.autos_number)
         self.ui.status.setText(doc.status)
         self.ui.team_leader.setText(doc.team_leader)
-        self.ui.team_number.setText(doc.team_number)
+        self.ui.team_number.setText(str(doc.team_number))
         self.ui.execute_to.setText(doc.get_execute_to_str())
         self.ui.start_time.setText(doc.get_start_time_str())
         self.ui.end_time.setText(doc.get_end_time_str())
+        try:
+            self.ui.work_button.clicked.disconnect()
+        except:
+            pass
+        if doc.status == "На исполнение":
+            self.ui.work_button.setText('Взять')
+            self.ui.work_button.clicked.connect(self._start_work_with_doc)
+        elif doc.status == "В работе":
+            self.ui.work_button.setText('Завершить')
+            self.ui.work_button.clicked.connect(self._stop_work_with_doc)
+        else:
+            self.ui.work_button.setText('')
+            self.ui.work_button.setEnabled(False)
+
+    def fill_table_header(self):
+        if not self.ui.init_GUI:
+            return
+        self.ui.doc_tbl.setItem(0, 1, QTableWidgetItem('Номенклатура'))
+        self.ui.doc_tbl.setItem(0, 2, QTableWidgetItem('Код'))
+        self.ui.doc_tbl.setItem(0, 3, QTableWidgetItem('Количество'))
+        self.ui.doc_tbl.setItem(0, 4, QTableWidgetItem('Статус'))
+        # self.ui.doc_tbl.setItem(0, 5, QTableWidgetItem('Отменено'))
+        # self.ui.doc_tbl.setItem(0, 6, QTableWidgetItem('Причина отмены'))
 
     def fill_table(self):
         if not self.ui.init_GUI:
             return
+        doc = self.model.doc
+        db = self.model.db
+        strings = db.get_doc_strings(doc.link)
+        self.ui.doc_tbl.setRowCount(len(strings) + 1)
+        _str = 1
+        for string in strings:
+            self.ui.doc_tbl.setItem(_str, 0, QTableWidgetItem(str(string.num)))
+            self.ui.doc_tbl.setItem(_str, 1, QTableWidgetItem(string.nomenclature.code))
+            self.ui.doc_tbl.setItem(_str, 2, QTableWidgetItem(string.nomenclature.name))
+            self.ui.doc_tbl.setItem(_str, 3, QTableWidgetItem(str(string.amount)))
+            self.ui.doc_tbl.setItem(_str, 4, QTableWidgetItem(string.status))
+
+            # # add checkbox to QTableWidgetItem
+            # check_box = QCheckBox(parent=self.ui.doc_tbl)
+            # check_box.string_num = string.num
+            # check_box.reason = string.reason_for_cancellation
+            # if string.cancelled:
+            #     check_box.setCheckState(Qt.Checked)
+            # check_box.stateChanged.connect(self._click_checkbox)
+            # checkbox_layout = QHBoxLayout()
+            # checkbox_layout.addWidget(check_box, 0, Qt.AlignCenter)
+            # checkbox_whole_widget = QWidget()
+            # checkbox_whole_widget.setLayout(checkbox_layout)
+            # self.ui.doc_tbl.setCellWidget(_str, 5, checkbox_whole_widget)
+            #
+            # # add LineEdit to QTableWidgetItem
+            # line_edit = QLineEdit(parent=self.ui.doc_tbl)
+            # line_edit.string_num = string.num
+            # line_edit.setText(string.reason_for_cancellation)
+            # line_edit.setEnabled(string.cancelled)
+            # # check_box.stateChanged.connect(self._click_checkbox)
+            # line_edit_layout = QHBoxLayout()
+            # line_edit_layout.addWidget(line_edit, 0, Qt.AlignCenter)
+            # lineedit_whole_widget = QWidget()
+            # lineedit_whole_widget.setLayout(line_edit_layout)
+            # self.ui.doc_tbl.setCellWidget(_str, 6, lineedit_whole_widget)
+            _str += 1
+
+        # делаем ресайз колонок по содержимому
+        sleep(0.01)
+        self.ui.doc_tbl.resizeColumnsToContents()
+        self.ui.doc_tbl.update()
+
+    @pyqtSlot(bool)
+    def _start_work_with_doc(self):
+        result = self.controller.start_work_with_document()
+
+    @pyqtSlot(bool)
+    def _stop_work_with_doc(self):
+        result = self.controller.stop_work_with_document()
+
+    # def _click_checkbox(self, state):
+    #     result = self.controller.click_checkbox(self.sender().string_num, state == Qt.Checked, self.sender().reason)
+    #     self.fill_table()

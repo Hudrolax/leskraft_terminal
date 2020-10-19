@@ -54,7 +54,7 @@ class MainWindow(QMainWindow):
         # создадим поток обновления ТЧ по таймеру
         self.table_timer_thread = QtCore.QThread()
         self.table_timer_handler = TimerHandler()
-        self.table_timer_handler.delay = 3000
+        self.table_timer_handler.delay = 1000
         self.table_timer_handler.moveToThread(self.table_timer_thread)
         self.table_timer_handler.timer_signal.connect(self._fill_table_by_timer)
         self.table_timer_thread.started.connect(self.table_timer_handler.run)
@@ -138,7 +138,7 @@ class MainWindow(QMainWindow):
             _str += 1
 
         # делаем ресайз колонок по содержимому
-        sleep(0.5)
+        sleep(0.01)
         self.ui.tbl1.resizeColumnsToContents()
         self.ui.tbl1.update()
 
