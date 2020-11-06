@@ -51,6 +51,7 @@ class MainWindow(QMainWindow):
 
         self.ui.get_btn.clicked.connect(self.controller.click_get_btn)
         self.ui.exit_btn.clicked.connect(self.controller.click_exit_btn)
+        self.ui.commands_btn.clicked.connect(self.controller.click_commands_btn)
         # создадим поток обновления ТЧ по таймеру
         self.table_timer_thread = QtCore.QThread()
         self.table_timer_handler = TimerHandler()
@@ -68,8 +69,8 @@ class MainWindow(QMainWindow):
         self.clock_timer_thread.started.connect(self.clock_timer_handler.run)
         self.clock_timer_thread.start()
 
-        self.showNormal()
-        # self.showFullScreen()
+        # self.showNormal()
+        self.showFullScreen()
         self.fill_header()
 
     def load_style(self):
@@ -122,7 +123,10 @@ class MainWindow(QMainWindow):
             self.ui.tbl1.setItem(_str, 1, QTableWidgetItem(str(doc.get_date_str())))
             self.ui.tbl1.setItem(_str, 2, QTableWidgetItem(doc.get_date_sending_str()))
             self.ui.tbl1.setItem(_str, 3, QTableWidgetItem(doc.type))
-            self.ui.tbl1.setItem(_str, 4, QTableWidgetItem(str(doc.team_number)))
+            if doc.team_number > 0:
+                self.ui.tbl1.setItem(_str, 4, QTableWidgetItem(str(doc.team_number)))
+            else:
+                self.ui.tbl1.setItem(_str, 4, QTableWidgetItem(""))
             self.ui.tbl1.setItem(_str, 5, QTableWidgetItem(doc.team_leader))
             self.ui.tbl1.setItem(_str, 6, QTableWidgetItem(doc.get_execute_to_str()))
             self.ui.tbl1.setItem(_str, 7, QTableWidgetItem(doc.get_start_time_str()))

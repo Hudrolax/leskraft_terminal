@@ -1,5 +1,6 @@
 from views.main_window import MainWindow
 from controllers.doc_form_controller import DocForm_controller
+from controllers.login_controller import Login_controller
 from utility.threaded_class import Threaded_class
 import sys
 
@@ -12,8 +13,10 @@ class MainController:
         self.model.get_docs()
 
     def click_getdoc_btn(self, doc):
-        print(doc)
         doc_controller = DocForm_controller(self, doc)
+
+    def click_commands_btn(self):
+        login_controller = Login_controller(self, create_team=True)
 
     def click_exit_btn(self):
         Threaded_class.stop()

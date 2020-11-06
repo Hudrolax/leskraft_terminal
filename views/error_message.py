@@ -1,13 +1,11 @@
 from PyQt5.QtWidgets import QDialog, QApplication, QLabel, QGraphicsDropShadowEffect
 from PyQt5 import QtWidgets, QtCore
 from PyQt5.QtGui import QFont, QColor
-from config import *
-import sys
 
 class Error_window(QDialog):
     HEIGHT = 200
     WIDTH = 300
-    def __init__(self, main_window, error, exit):
+    def __init__(self, main_window, error, exit=False):
         super().__init__()
         self.main_window = main_window
         self.setObjectName('error_dialog')

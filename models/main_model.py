@@ -13,70 +13,140 @@ import threading
 
 
 class MainModel(Threaded_class, LoggerSuper):
-    _USER = USER
-    _PASSWORD = PASSWORD
-    _SERVER = SERVER
-    _GET_DOCS_ROUTE = GET_DOCS_ROUTE
-    _API_KEY = API_KEY
 
     logger = logging.getLogger('MainModel')
     def __init__(self):
+        self._update = False
         self._observers = []  # список наблюдателей
         self.db = DB()
         self._getdata_thread = threading.Thread(target=self._threaded_get_data, args=(), daemon=False)
         self._getdata_thread.start()
+        self._online = False
+
+    def get_online_status(self):
+        return self._online
+
+    def update(self):
+        if AUTO_UPDATE:
+            self._update = True
+            while self._update:
+                sleep(0.1)
+            return True
+        else:
+            return False
 
     def _threaded_get_data(self):
         while self.working:
             if AUTO_UPDATE:
                 self.get_docs()
+                self.get_employees()
+                self.get_teams()
+                self.get_employee_connections()
                 self.interrupted_sleep(AUTO_UPDATE_TIME)
 
-    def get_docs(self):
+    def interrupted_sleep(self, pause):
+        for k in range(10, pause*10):
+            if self.working and not self._update:
+                sleep(0.1)
+            elif self._update:
+                self._update = False
+                return
+            else:
+                return
+
+    def get_http_data(self, route, func):
         try:
-            content = requests.get(f'http://{self._SERVER}{self._GET_DOCS_ROUTE}?api_key={self._API_KEY}', auth=(self._USER, self._PASSWORD)).content.decode()
+            content = requests.get(f'http://{SERVER}/{BASE_NAME}{route}?api_key={API_KEY}',\
+                      auth=(USER, PASSWORD)).content.decode()
             decoded_json = json.loads(content)
             self.logger.debug(f'Get JSON: {decoded_json}')
-            json_docs = decoded_json.get('docs')
-            self.db.clear_db()
-            for json_doc in json_docs:
-                _link = json_doc.get('link')
-                _num = json_doc.get('num')
-                _date = json_doc.get('date')
-                _date_sending= json_doc.get('date_sending')
-                _type = json_doc.get('type')
-                _storage = json_doc.get('storage')
-                _doc_status = json_doc.get('doc_status')
-                _execute_to = json_doc.get('execute_to')
-                _team_leader = json_doc.get('team_leader')
-                _team_number = json_doc.get('team_number')
-                _start_time = json_doc.get('start_time')
-                _end_time = json_doc.get('end_time')
-                _destination = json_doc.get('destination')
-                _autos_number = json_doc.get('autos_number')
-                self.db.add_document(_link, _num, _date, _date_sending, _type, _storage, _doc_status, _execute_to, _team_leader, _team_number, _start_time, _end_time, _destination, _autos_number)
-
-                _table = json_doc.get('table')
-                for json_str in _table:
-                    _num = json_str.get('nomenclature_code')
-                    _nomenclature_code = json_str.get('nomenclature_code')
-                    _nomenclature_name = json_str.get('nomenclature_name')
-                    self.db.add_nomenclature(_nomenclature_code, _nomenclature_name)
-                    _amount = json_str.get('amount')
-                    _status = json_str.get('status')
-                    _cancelled = json_str.get('cancelled')
-                    _reason_for_cancellation = json_str.get('reason_for_cancellation')
-                    self.db.add_doc_table_string(_link, _num, _nomenclature_code, _amount, _status, _cancelled, _reason_for_cancellation)
-        except (requests.exceptions.ConnectionError or requests.exceptions.ConnectTimeout or requests.exceptions.BaseHTTPError) as e:
-            self.logger.critical(e)
-            sleep(5)
+            func(decoded_json)
+            self._online = True
         except Exception as e:
+            self._online = False
             self.logger.critical(e)
             sleep(5)
-            # if e.__class__.__name__ == "ProgrammingError":
-            #     self.show_error_message('Ошибка базы данных', True)
-            # else:
-            #     self.show_error_message('Ошибка парсинга входящих данных', False)
+
+    def _get_docs(self, decoded_json):
+        json_docs = decoded_json.get('docs')
+        self.db.clear_docs()
+        for json_doc in json_docs:
+            args = []
+            args.append(json_doc.get('link'))
+            args.append(json_doc.get('num'))
+            args.append(json_doc.get('date'))
+            args.append(json_doc.get('date_sending'))
+            args.append(json_doc.get('type'))
+            args.append(json_doc.get('storage'))
+            args.append(json_doc.get('doc_status'))
+            args.append(json_doc.get('execute_to'))
+            args.append(json_doc.get('team_leader'))
+            args.append(json_doc.get('team_number'))
+            args.append(json_doc.get('start_time'))
+            args.append(json_doc.get('end_time'))
+            args.append(json_doc.get('destination'))
+            args.append(json_doc.get('autos_number'))
+            self.db.add_document(*args)
+            _table = json_doc.get('table')
+            for json_str in _table:
+                args_str = []
+                args_str.append(args[0])
+                args_str.append(json_str.get('num'))
+
+                _nomenclature_code = json_str.get('nomenclature_code')
+                _nomenclature_name = json_str.get('nomenclature_name')
+                self.db.add_nomenclature(_nomenclature_code, _nomenclature_name)
+
+                args_str.append(_nomenclature_code)
+                args_str.append(json_str.get('amount'))
+                args_str.append(json_str.get('status'))
+                args_str.append(json_str.get('cancelled'))
+                args_str.append(json_str.get('reason_for_cancellation'))
+                self.db.add_doc_table_string(*args_str)
+
+    def _get_employees(self, decoded_json):
+        json_records = decoded_json.get('employees')
+        self.db.clear_employees()
+        for json_rec in json_records:
+            args = []
+            args.append(json_rec.get('name'))
+            args.append(json_rec.get('card_number'))
+            self.db.add_employee(*args)
+
+    def _get_teams(self, decoded_json):
+        json_records = decoded_json.get('teams')
+        self.db.clear_teams()
+        for json_rec in json_records:
+            args = []
+            args.append(json_rec.get('num'))
+            args.append(json_rec.get('date'))
+            args.append(json_rec.get('team_leader'))
+            args.append(json_rec.get('terminal_api'))
+            self.db.add_team(*args)
+
+    def _get_employee_connections(self, decoded_json):
+        json_records = decoded_json.get('employee_connections')
+        self.db.clear_employee_connections()
+        for json_rec in json_records:
+            args = []
+            args.append(json_rec.get('card_number'))
+            args.append(json_rec.get('team_num'))
+            args.append(json_rec.get('team_date'))
+            args.append(json_rec.get('position'))
+            self.db.add_employee_connection(*args)
+
+    def get_docs(self):
+        self.get_http_data(GET_DOCS_ROUTE, self._get_docs)
+
+    def get_employees(self):
+        self.get_http_data(GET_EMPLOYEES_ROUTE, self._get_employees)
+
+    def get_teams(self):
+        self.get_http_data(GET_TEAMS_ROUTE, self._get_teams)
+
+    def get_employee_connections(self):
+        self.get_http_data(GET_EMPLOYEE_CONNECTIONS_ROUTE, self._get_employee_connections)
+
 
     def show_error_message(self, message, exit):
         for observer in self._observers:
@@ -90,4 +160,6 @@ if __name__ == '__main__':
     model.get_docs()
     for doc in model.db.documents:
         model.db.get_fuul_doc_description(doc.link)
+    model.get_employees()
+    model.get_teams()
     Threaded_class.stop()

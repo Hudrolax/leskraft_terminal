@@ -1,7 +1,7 @@
 from views.doc_form_ui import Ui_doc_form
 from PyQt5.QtGui import QFont
 from PyQt5.QtCore import Qt, pyqtSlot
-from PyQt5.QtWidgets import QDialog, QApplication, QTableWidgetItem, QCheckBox, QHBoxLayout, QWidget, QLineEdit
+from PyQt5.QtWidgets import QDialog, QApplication, QTableWidgetItem
 from utility.logger_super import LoggerSuper
 from time import sleep
 import logging
@@ -13,7 +13,7 @@ class GUI_Doc_Window(Ui_doc_form, LoggerSuper):
         self.doc_tbl.setRowCount(1)
         self.doc_tbl.setColumnCount(5)
 
-        window.resize(1200, 768)
+        window.resize(1200, 700)
         self.init_GUI = True
 
     def set_table_header_style(self):
@@ -59,7 +59,10 @@ class DocumentWindow(QDialog):
         self.ui.autos_number.setText(doc.autos_number)
         self.ui.status.setText(doc.status)
         self.ui.team_leader.setText(doc.team_leader)
-        self.ui.team_number.setText(str(doc.team_number))
+        if doc.team_number > 0:
+            self.ui.team_number.setText(str(doc.team_number))
+        else:
+            self.ui.team_number.setText("")
         self.ui.execute_to.setText(doc.get_execute_to_str())
         self.ui.start_time.setText(doc.get_start_time_str())
         self.ui.end_time.setText(doc.get_end_time_str())
@@ -136,6 +139,8 @@ class DocumentWindow(QDialog):
     @pyqtSlot(bool)
     def _start_work_with_doc(self):
         result = self.controller.start_work_with_document()
+        if result:
+            self.close()
 
     @pyqtSlot(bool)
     def _stop_work_with_doc(self):
