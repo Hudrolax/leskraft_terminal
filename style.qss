@@ -14,7 +14,7 @@ QDialog#doc_form > QLabel#doc_name{
 }
 QTableWidget{
     background-color: #272822;
-    font: 12pt \"Consolas\";
+    font: 18pt \"Consolas\";
     color: #F8F8F2;
     gridline-color: white;
     border-radius: 12px;

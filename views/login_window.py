@@ -1,16 +1,20 @@
 from views.login_ui import Ui_Login
 from PyQt5.QtGui import QFont
 from PyQt5.QtCore import Qt
-from PyQt5.QtWidgets import QDialog, QApplication, QTableWidgetItem
+from PyQt5.QtWidgets import QApplication, QDialog, QTableWidgetItem, QPushButton
+from PyQt5 import QtCore
 from utility.logger_super import LoggerSuper
 import logging
+from time import sleep
 
 
 class GUI_Login_Window(Ui_Login, LoggerSuper):
     logger = logging.getLogger('Login_form')
     def custom_setup(self, window):
         self.tbl.setRowCount(1)
-        self.tbl.setColumnCount(4)
+        self.tbl.setColumnCount(5)
+        self.tbl.setStyleSheet("font: 12pt \"Consolas\";")
+        self.tbl.setSortingEnabled(False)
 
         window.resize(640, 480)
         self.init_GUI = True
@@ -40,19 +44,49 @@ class LoginWindow(QDialog):
             self.set_register_teammates_screen()
 
         self.ui.exit_btn.clicked.connect(self.controller.close)
-        self.ui.pushButton.clicked.connect(self.btn_register_team_clicked)
+        self.ui.pushButton.clicked.connect(self._btn_register_team_clicked)
 
         self.showNormal()
         self.fill_table_header()
         self.center_on_screen()
 
+        # создадим поток обновления ТЧ по таймеру
+        self.table_timer_thread = QtCore.QThread()
+        self.table_timer_handler = TimerHandler()
+        self.table_timer_handler.delay = 100
+        self.table_timer_handler.moveToThread(self.table_timer_thread)
+        self.table_timer_handler.timer_signal.connect(self._fill_table_by_timer)
+        self.table_timer_thread.started.connect(self.table_timer_handler.run)
+        self.table_timer_thread.start()
+
+    def maximum_teammates_reached_message(self):
+        self.ui.label_2.setText(f'Количество участников бригады не может быть больше {self.model.maximum_teammates+1}')
+        self.ui.label_2.setStyleSheet("color: red")
+
+    def team_leader_not_found_message(self, card_id):
+        _text = f'Сотрудник с картой {card_id} не найден. Попробуйте другую карту.'
+        self.ui.label_2.setText(_text)
+        self.ui.label_3.setText(_text)
+        self.ui.label_2.setStyleSheet("color: red")
+        self.ui.label_3.setStyleSheet("color: red")
+
     def set_create_team_screen(self):
         self.ui.tabWidget.setTabEnabled(1, False)
         self.ui.tabWidget.setTabEnabled(0, True)
+        self.ui.tabWidget.setCurrentIndex(0)
+        self.ui.label_2.setVisible(False)
+        self.ui.label_3.setVisible(True)
+        self.ui.label_3.setStyleSheet("color: black")
+        self.ui.label_3.setText("Отсканируйте карту кладовщика")
 
     def set_register_teammates_screen(self):
         self.ui.tabWidget.setTabEnabled(0, False)
         self.ui.tabWidget.setTabEnabled(1, True)
+        self.ui.tabWidget.setCurrentIndex(1)
+        self.ui.label_2.setVisible(True)
+        self.ui.label_3.setVisible(False)
+        self.ui.label_2.setText("Отсканируйте карту участника команды")
+        self.ui.label_2.setStyleSheet("color: black")
 
     def center_on_screen(self):
         resolution = QApplication.desktop().availableGeometry()
@@ -62,10 +96,55 @@ class LoginWindow(QDialog):
     def fill_table_header(self):
         if not self.ui.init_GUI:
             return
-        self.ui.tbl.setItem(0, 1, QTableWidgetItem('№'))
-        self.ui.tbl.setItem(0, 2, QTableWidgetItem('Имя'))
-        self.ui.tbl.setItem(0, 3, QTableWidgetItem('Карта'))
-        self.ui.tbl.setItem(0, 4, QTableWidgetItem('Роль'))
+        self.ui.tbl.setItem(0, 0, QTableWidgetItem('№'))
+        self.ui.tbl.setItem(0, 1, QTableWidgetItem('Имя'))
+        self.ui.tbl.setItem(0, 2, QTableWidgetItem('Карта'))
+        self.ui.tbl.setItem(0, 3, QTableWidgetItem('Роль'))
+        sleep(0.01)
+        self.ui.tbl.resizeColumnsToContents()
+        self.ui.tbl.update()
 
-    def btn_register_team_clicked(self):
-        self.controller.btn_register_team_clicked(self.ui.pushButton.text())
+    @QtCore.pyqtSlot()
+    def _fill_table_by_timer(self):
+        self.fill_table()
+
+    def fill_table(self):
+        if not self.ui.init_GUI:
+            return
+        if self.model.team_leader is None:
+            return
+        self.ui.tbl.setRowCount(len(self.model.teammates) + 2)
+        self.ui.tbl.setItem(1, 0, QTableWidgetItem('1'))
+        self.ui.tbl.setItem(1, 1, QTableWidgetItem(self.model.team_leader.name))
+        self.ui.tbl.setItem(1, 2, QTableWidgetItem(self.model.team_leader.card_number))
+        self.ui.tbl.setItem(1, 3, QTableWidgetItem('Роль'))
+        for emp in enumerate(self.model.teammates):
+            self.ui.tbl.setItem(emp[0]+2, 0, QTableWidgetItem(str(emp[0]+2)))
+            self.ui.tbl.setItem(emp[0]+2, 1, QTableWidgetItem(emp[1].name))
+            self.ui.tbl.setItem(emp[0]+2, 2, QTableWidgetItem(emp[1].card_number))
+            self.ui.tbl.setItem(emp[0]+2, 3, QTableWidgetItem('Роль'))
+
+            btn = QPushButton(self.ui.tbl)
+            btn.setText('Удалить')
+            btn.clicked.connect(self._btn_del_employee_clicked)
+            btn.employee = emp[1]
+            self.ui.tbl.setCellWidget(emp[0]+2, 4, btn)
+
+        sleep(0.01)
+        self.ui.tbl.resizeColumnsToContents()
+        self.ui.tbl.update()
+
+    def _btn_register_team_clicked(self):
+        self.controller.get_RFID_signal(self.ui.lineEdit.text())
+
+    def _btn_del_employee_clicked(self):
+        self.controller.del_employee(self.sender().employee)
+
+class TimerHandler(QtCore.QObject):
+    timer_signal = QtCore.pyqtSignal()
+    delay = 100
+
+    def run(self):
+        while True:
+            self.timer_signal.emit()
+            QtCore.QThread.msleep(self.delay)

@@ -398,6 +398,7 @@ class DB(Threaded_class, LoggerSuper):
 
     def get_employee(self, param):
         for employee in self._employees:
+            param = str(param)
             if employee.card_number == param or employee.name == param:
                 return employee
         return None

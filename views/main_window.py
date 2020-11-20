@@ -4,7 +4,7 @@ from PyQt5 import QtCore, QtGui
 from views.main_ui import Ui_MainWindow
 from utility.threaded_class import Threaded_class
 from config import *
-from PyQt5.QtCore import QFile, QTextStream, QObject
+from PyQt5.QtCore import QFile, QTextStream
 import logging
 from utility.logger_super import LoggerSuper
 import sys
@@ -17,7 +17,7 @@ class GUI_Main_Window(Ui_MainWindow, LoggerSuper):
         self.tbl1.setRowCount(1)
         self.tbl1.setColumnCount(13)
 
-        window.resize(1600, 768)
+        window.resize(1750, 768)
         pixmap = QPixmap('res/img/logo.png')
         self.logo_label.setPixmap(pixmap)
         self.init_GUI = True
@@ -30,6 +30,7 @@ class GUI_Main_Window(Ui_MainWindow, LoggerSuper):
         self.time_lcd_second.setPalette(palette)
         self.time_separator_1.setStyleSheet('color: #00FF00')
         self.time_separator_2.setStyleSheet('color: #00FF00')
+        self.commands_btn.setText('Создать команду')
 
     def set_table_header_style(self):
         self.tbl1.item(0, 0).setFont(QFont("Consolas", 18, QFont.Bold))
@@ -69,8 +70,8 @@ class MainWindow(QMainWindow):
         self.clock_timer_thread.started.connect(self.clock_timer_handler.run)
         self.clock_timer_thread.start()
 
-        # self.showNormal()
-        self.showFullScreen()
+        self.showNormal()
+        # self.showFullScreen()
         self.fill_header()
 
     def load_style(self):
@@ -159,10 +160,6 @@ class MainWindow(QMainWindow):
         self.ui.time_lcd_hour.display(format_digit(datetime.now().hour))
         self.ui.time_lcd_minute.display(format_digit(datetime.now().minute))
         self.ui.time_lcd_second.display(format_digit(datetime.now().second))
-
-
-    def model_is_changed( self ):
-        self.fill_table()
 
     @QtCore.pyqtSlot()
     def _fill_table_by_timer(self):
