@@ -24,11 +24,22 @@ class Login_model(LoggerSuper):
         self.teammates.remove(employee)
         self.update_window_state()
 
+    def send_team_to_1c(self):
+        pass
+
     def get_rfid_code(self, card_id):
         employee = self.db.get_employee(card_id)
+        # Не нашли человека, покажем ошибку
         if employee == None:
             self.controller.window.team_leader_not_found_message(card_id)
             return
+
+        # Кладовщик отметился второй за, значит формируем бригаду в 1С
+        if len(self.teammates) > 0 and self.team_leader is not None:
+            self.send_team_to_1c()
+            return
+
+        # слишком много участников? не порядок
         if len(self.teammates) >= self.maximum_teammates:
             self.controller.window.maximum_teammates_reached_message()
             return

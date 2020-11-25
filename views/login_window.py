@@ -58,6 +58,7 @@ class LoginWindow(QDialog):
         self.table_timer_handler.timer_signal.connect(self._fill_table_by_timer)
         self.table_timer_thread.started.connect(self.table_timer_handler.run)
         self.table_timer_thread.start()
+        self._update_table = False
 
     def maximum_teammates_reached_message(self):
         self.ui.label_2.setText(f'Количество участников бригады не может быть больше {self.model.maximum_teammates+1}')
@@ -87,6 +88,7 @@ class LoginWindow(QDialog):
         self.ui.label_3.setVisible(False)
         self.ui.label_2.setText("Отсканируйте карту участника команды")
         self.ui.label_2.setStyleSheet("color: black")
+        self._update_table = True
 
     def center_on_screen(self):
         resolution = QApplication.desktop().availableGeometry()
@@ -113,22 +115,27 @@ class LoginWindow(QDialog):
             return
         if self.model.team_leader is None:
             return
-        self.ui.tbl.setRowCount(len(self.model.teammates) + 2)
-        self.ui.tbl.setItem(1, 0, QTableWidgetItem('1'))
-        self.ui.tbl.setItem(1, 1, QTableWidgetItem(self.model.team_leader.name))
-        self.ui.tbl.setItem(1, 2, QTableWidgetItem(self.model.team_leader.card_number))
-        self.ui.tbl.setItem(1, 3, QTableWidgetItem('Роль'))
-        for emp in enumerate(self.model.teammates):
-            self.ui.tbl.setItem(emp[0]+2, 0, QTableWidgetItem(str(emp[0]+2)))
-            self.ui.tbl.setItem(emp[0]+2, 1, QTableWidgetItem(emp[1].name))
-            self.ui.tbl.setItem(emp[0]+2, 2, QTableWidgetItem(emp[1].card_number))
-            self.ui.tbl.setItem(emp[0]+2, 3, QTableWidgetItem('Роль'))
+        if self._update_table:
+            self._update_table = False
+            self.ui.tbl.setRowCount(len(self.model.teammates) + 2)
+            self.ui.tbl.setItem(1, 0, QTableWidgetItem('1'))
+            self.ui.tbl.setItem(1, 1, QTableWidgetItem(self.model.team_leader.name))
+            self.ui.tbl.setItem(1, 2, QTableWidgetItem(self.model.team_leader.card_number))
+            self.ui.tbl.setItem(1, 3, QTableWidgetItem('Роль'))
+            for emp in enumerate(self.model.teammates):
+                self.ui.tbl.setItem(emp[0]+2, 0, QTableWidgetItem(str(emp[0]+2)))
+                self.ui.tbl.setItem(emp[0]+2, 1, QTableWidgetItem(emp[1].name))
+                self.ui.tbl.setItem(emp[0]+2, 2, QTableWidgetItem(emp[1].card_number))
+                self.ui.tbl.setItem(emp[0]+2, 3, QTableWidgetItem('Роль'))
 
-            btn = QPushButton(self.ui.tbl)
-            btn.setText('Удалить')
-            btn.clicked.connect(self._btn_del_employee_clicked)
-            btn.employee = emp[1]
-            self.ui.tbl.setCellWidget(emp[0]+2, 4, btn)
+                btn = QPushButton(self.ui.tbl)
+                btn.setText('Удалить')
+                btn.clicked.connect(self._btn_del_employee_clicked)
+                btn.employee = emp[1]
+                """Для потомков:
+                    setCellWidget крашит программу, когда пытаешься вызвать его из основного потока формы
+                    Потому заполнение таблицы сделано в отдельном потоке"""
+                self.ui.tbl.setCellWidget(emp[0]+2, 4, btn)
 
         sleep(0.01)
         self.ui.tbl.resizeColumnsToContents()
