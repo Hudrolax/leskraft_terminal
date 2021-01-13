@@ -10,6 +10,7 @@ from utility.logger_super import LoggerSuper
 import sys
 from time import sleep
 from datetime import datetime
+from env import FULLSCREEN
 
 class GUI_Main_Window(Ui_MainWindow, LoggerSuper):
     logger = logging.getLogger('Main_Window')
@@ -70,8 +71,10 @@ class MainWindow(QMainWindow):
         self.clock_timer_thread.started.connect(self.clock_timer_handler.run)
         self.clock_timer_thread.start()
 
-        self.showNormal()
-        # self.showFullScreen()
+        if not FULLSCREEN:
+            self.showNormal()
+        else:
+            self.showFullScreen()
         self.fill_header()
 
     def load_style(self):
