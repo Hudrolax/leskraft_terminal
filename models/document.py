@@ -6,7 +6,7 @@ from datetime import datetime
 
 
 class DocumentTableString:
-    def __init__(self, doc_link, num, nomenclature, amount, status, cancelled, reason_for_cancellation):
+    def __init__(self, doc_link, num, nomenclature, amount, status, adress_shelf, adress_floor, cancelled, reason_for_cancellation):
         """
         Класс описывает строку документа
         :param doc_link: тип строка. Ссылка на документ.
@@ -14,6 +14,8 @@ class DocumentTableString:
         :param nomenclature: тип Nomenclature. Номенклатура.
         :param amount: тип число float. Количество.
         :param status: тип строка. Статус строки (НаИсполнение, ВРаботе, Выполнено)
+        :param adress_shelf: тип строка. Адрес полка по адресному хранению ЛК.
+        :param adress_floor: тип строка. Адрес пол по адресному хранению ЛК.
         :param cancelled: тип булево. Признак отмены строки.
         :param reason_for_cancellation: тип строка. Причина отмены.
         """
@@ -24,6 +26,8 @@ class DocumentTableString:
         self.nomenclature = nomenclature
         self.amount = amount
         self.status = status
+        self.adress_shelf = adress_shelf
+        self.adress_floor = adress_floor
         self.cancelled = cancelled
         self.reason_for_cancellation = reason_for_cancellation
 

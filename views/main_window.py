@@ -1,7 +1,7 @@
 from PyQt5.QtWidgets import QMainWindow, QDialog, QTableWidgetItem, QPushButton
 from PyQt5.QtGui import QFont, QPixmap
 from PyQt5 import QtCore, QtGui
-from views.main_ui import Ui_MainWindow
+from views.ui.main_ui import Ui_MainWindow
 from utility.threaded_class import Threaded_class
 from config import *
 from PyQt5.QtCore import QFile, QTextStream
@@ -17,7 +17,7 @@ class GUI_Main_Window(Ui_MainWindow, LoggerSuper):
         self.tbl1.setRowCount(1)
         self.tbl1.setColumnCount(13)
 
-        window.resize(1750, 768)
+        window.resize(1920, 768)
         pixmap = QPixmap('res/img/logo.png')
         self.logo_label.setPixmap(pixmap)
         self.init_GUI = True
@@ -30,7 +30,7 @@ class GUI_Main_Window(Ui_MainWindow, LoggerSuper):
         self.time_lcd_second.setPalette(palette)
         self.time_separator_1.setStyleSheet('color: #00FF00')
         self.time_separator_2.setStyleSheet('color: #00FF00')
-        self.commands_btn.setText('Создать команду')
+        self.create_team_btn.setText('Создать команду')
 
     def set_table_header_style(self):
         self.tbl1.item(0, 0).setFont(QFont("Consolas", 18, QFont.Bold))
@@ -52,7 +52,7 @@ class MainWindow(QMainWindow):
 
         self.ui.get_btn.clicked.connect(self.controller.click_get_btn)
         self.ui.exit_btn.clicked.connect(self.controller.click_exit_btn)
-        self.ui.commands_btn.clicked.connect(self.controller.click_commands_btn)
+        self.ui.create_team_btn.clicked.connect(self.controller.click_commands_btn)
         # создадим поток обновления ТЧ по таймеру
         self.table_timer_thread = QtCore.QThread()
         self.table_timer_handler = TimerHandler()

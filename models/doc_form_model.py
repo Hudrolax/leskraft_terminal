@@ -1,6 +1,6 @@
 from utility.logger_super import LoggerSuper
 import logging
-from env import *
+from env import SERVER, BASE_NAME, GET_TASK_ROUTE
 import requests
 
 class DocumentForm_model(LoggerSuper):
@@ -21,7 +21,7 @@ class DocumentForm_model(LoggerSuper):
     def _get_task(self):
         _TIMEOUT = 10
         try:
-            url = f'http://{SERVER}{GET_TASK_ROUTE}'
+            url = f'http://{SERVER}{BASE_NAME}{GET_TASK_ROUTE}'
             headers = {'Content-type': 'application/json',  # Определение типа данных
                         'Accept': 'text/plain',
                         'Authorization': AUTH_BASIC}

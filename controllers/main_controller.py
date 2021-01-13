@@ -1,6 +1,6 @@
 from views.main_window import MainWindow
 from controllers.doc_form_controller import DocForm_controller
-from controllers.login_controller import Login_controller
+from controllers.create_team_controller import CreateTeam_controller
 from utility.threaded_class import Threaded_class
 from controllers.RFID_scanner import RFIDScanner
 from env import RFID_SCANNER_PID
@@ -19,7 +19,7 @@ class MainController:
         doc_controller = DocForm_controller(self, doc)
 
     def click_commands_btn(self):
-        login_controller = Login_controller(self, create_team=True)
+        login_controller = CreateTeam_controller(self)
 
     def click_exit_btn(self):
         Threaded_class.stop()

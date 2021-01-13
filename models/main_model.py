@@ -100,6 +100,8 @@ class MainModel(Threaded_class, LoggerSuper):
                 args_str.append(_nomenclature_code)
                 args_str.append(json_str.get('amount'))
                 args_str.append(json_str.get('status'))
+                args_str.append(json_str.get('adress_shelf'))
+                args_str.append(json_str.get('adress_floor'))
                 args_str.append(json_str.get('cancelled'))
                 args_str.append(json_str.get('reason_for_cancellation'))
                 self.db.add_doc_table_string(*args_str)
@@ -111,6 +113,7 @@ class MainModel(Threaded_class, LoggerSuper):
             args = []
             args.append(json_rec.get('name'))
             args.append(json_rec.get('card_number'))
+            args.append(json_rec.get('role'))
             self.db.add_employee(*args)
 
     def _get_teams(self, decoded_json):
@@ -132,7 +135,6 @@ class MainModel(Threaded_class, LoggerSuper):
             args.append(json_rec.get('card_number'))
             args.append(json_rec.get('team_num'))
             args.append(json_rec.get('team_date'))
-            args.append(json_rec.get('position'))
             self.db.add_employee_connection(*args)
 
     def get_docs(self):

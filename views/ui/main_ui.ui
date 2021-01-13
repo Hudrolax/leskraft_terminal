@@ -195,7 +195,14 @@
        </layout>
       </item>
       <item>
-       <widget class="QPushButton" name="commands_btn">
+       <widget class="QPushButton" name="create_team_btn">
+        <property name="text">
+         <string>Создать команду</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QPushButton" name="teamslist_btn">
         <property name="text">
          <string>Список команд</string>
         </property>

@@ -1,4 +1,4 @@
-from views.login_ui import Ui_Login
+from views.ui.create_team_ui import Ui_Login
 from PyQt5.QtGui import QFont
 from PyQt5.QtCore import Qt
 from PyQt5.QtWidgets import QApplication, QDialog, QTableWidgetItem, QPushButton
@@ -25,8 +25,8 @@ class GUI_Login_Window(Ui_Login, LoggerSuper):
             self.tbl.item(0, col).setFont(QFont("Consolas", 14, QFont.Bold))
             self.tbl.item(0, col).setTextAlignment(Qt.AlignCenter | Qt.AlignCenter)
 
-class LoginWindow(QDialog):
-    def __init__(self, controller, model, parent = None, create_team = True):
+class CreateTeamWindow(QDialog):
+    def __init__(self, controller, model, parent = None):
         super(QDialog, self).__init__(parent)
         self.controller = controller
         self.model = model
@@ -38,10 +38,7 @@ class LoginWindow(QDialog):
         self.ui = GUI_Login_Window()
         self.ui.setupUi(self)
         self.ui.custom_setup(self)
-        if create_team:
-            self.set_create_team_screen()
-        else:
-            self.set_register_teammates_screen()
+        self.set_create_team_screen()
 
         self.ui.exit_btn.clicked.connect(self.controller.close)
         self.ui.pushButton.clicked.connect(self._btn_register_team_clicked)
@@ -64,31 +61,69 @@ class LoginWindow(QDialog):
         self.ui.label_2.setText(f'Количество участников бригады не может быть больше {self.model.maximum_teammates+1}')
         self.ui.label_2.setStyleSheet("color: red")
 
-    def team_leader_not_found_message(self, card_id):
+    def employee_not_found_message(self, card_id):
         _text = f'Сотрудник с картой {card_id} не найден. Попробуйте другую карту.'
-        self.ui.label_2.setText(_text)
-        self.ui.label_3.setText(_text)
-        self.ui.label_2.setStyleSheet("color: red")
-        self.ui.label_3.setStyleSheet("color: red")
+        self.ui.state_label.setText(_text)
+        self.ui.state_label.setStyleSheet("color: red")
+
+    def it_is_not_team_leader_error(self, card_id):
+        _text = f'Сотрудник с картой {card_id} не является кладовщиком!.'
+        self.ui.state_label.setText(_text)
+        self.ui.state_label.setStyleSheet("color: red")
+
+    def employee_already_exist_message(self, card_id):
+        _text = f'Сотрудник с картой {card_id} уже является участником команды!.'
+        self.ui.state_label.setText(_text)
+        self.ui.state_label.setStyleSheet("color: red")
 
     def set_create_team_screen(self):
-        self.ui.tabWidget.setTabEnabled(1, False)
         self.ui.tabWidget.setTabEnabled(0, True)
+        self.ui.tabWidget.setTabEnabled(1, False)
+        self.ui.tabWidget.setTabEnabled(2, False)
         self.ui.tabWidget.setCurrentIndex(0)
         self.ui.label_2.setVisible(False)
         self.ui.label_3.setVisible(True)
         self.ui.label_3.setStyleSheet("color: black")
-        self.ui.label_3.setText("Отсканируйте карту кладовщика")
+        _text = "Отсканируйте карту кладовщика"
+        self.ui.label_3.setText(_text)
+        self.ui.state_label.setText(_text)
+        self.ui.state_label.setStyleSheet("color: black")
 
     def set_register_teammates_screen(self):
         self.ui.tabWidget.setTabEnabled(0, False)
         self.ui.tabWidget.setTabEnabled(1, True)
+        self.ui.tabWidget.setTabEnabled(2, False)
         self.ui.tabWidget.setCurrentIndex(1)
         self.ui.label_2.setVisible(True)
         self.ui.label_3.setVisible(False)
-        self.ui.label_2.setText("Отсканируйте карту участника команды")
+        _text = "Отсканируйте карту участника команды"
+        self.ui.label_2.setText(_text)
         self.ui.label_2.setStyleSheet("color: black")
+        self.ui.state_label.setText(_text)
+        self.ui.state_label.setStyleSheet("color: black")
         self._update_table = True
+
+    def set_register_team_screen(self, result):
+        self.ui.tabWidget.setTabEnabled(0, False)
+        self.ui.tabWidget.setTabEnabled(1, False)
+        self.ui.tabWidget.setTabEnabled(2, True)
+        self.ui.tabWidget.setCurrentIndex(2)
+
+        if result:
+            _text = "Команда зарегистрирована"
+            self.ui.label_6.setText(_text)
+            self.ui.label_6.setStyleSheet("color: black")
+            self.ui.state_label.setText(_text)
+            self.ui.state_label.setStyleSheet("color: black")
+        else:
+            _text = "Ошибка регистрации команды"
+            self.ui.label_6.setText(_text)
+            self.ui.label_6.setStyleSheet("color: red")
+            self.ui.state_label.setText(_text)
+            self.ui.state_label.setStyleSheet("color: red")
+        self._update_table = True
+        sleep(3)
+        self.controller.close()
 
     def center_on_screen(self):
         resolution = QApplication.desktop().availableGeometry()
@@ -121,12 +156,12 @@ class LoginWindow(QDialog):
             self.ui.tbl.setItem(1, 0, QTableWidgetItem('1'))
             self.ui.tbl.setItem(1, 1, QTableWidgetItem(self.model.team_leader.name))
             self.ui.tbl.setItem(1, 2, QTableWidgetItem(self.model.team_leader.card_number))
-            self.ui.tbl.setItem(1, 3, QTableWidgetItem('Роль'))
+            self.ui.tbl.setItem(1, 3, QTableWidgetItem(self.model.team_leader.role))
             for emp in enumerate(self.model.teammates):
                 self.ui.tbl.setItem(emp[0]+2, 0, QTableWidgetItem(str(emp[0]+2)))
                 self.ui.tbl.setItem(emp[0]+2, 1, QTableWidgetItem(emp[1].name))
                 self.ui.tbl.setItem(emp[0]+2, 2, QTableWidgetItem(emp[1].card_number))
-                self.ui.tbl.setItem(emp[0]+2, 3, QTableWidgetItem('Роль'))
+                self.ui.tbl.setItem(emp[0]+2, 3, QTableWidgetItem(emp[1].role))
 
                 btn = QPushButton(self.ui.tbl)
                 btn.setText('Удалить')

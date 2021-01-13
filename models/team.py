@@ -2,22 +2,31 @@ from utility.util import date_setter
 
 
 class Employee:
-    def __init__(self, name, card_number):
+    def __init__(self, name, card_number, role):
         self.name = name
         self.card_number = card_number
+        self.role = role
 
     def __str__(self):
         return self.name
 
+    def __eq__(self, other):
+        if isinstance(other, Employee):
+            if self.card_number == other.card_number:
+                return True
+            else:
+                return False
+        else:
+            return False
+
 
 class Employee_connection:
-    def __init__(self, employee, team, position):
+    def __init__(self, employee, team):
         self.employee = employee
         self.team = team
-        self.position = position
 
     def __str__(self):
-        return f'{self.employee.name} команда {self.team.num} ({self.position})'
+        return f'{self.employee.name} команда {self.team.num} ({self.employee.role})'
 
 
 class Team:

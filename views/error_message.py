@@ -3,8 +3,8 @@ from PyQt5 import QtWidgets, QtCore
 from PyQt5.QtGui import QFont, QColor
 
 class Error_window(QDialog):
-    HEIGHT = 200
-    WIDTH = 300
+    HEIGHT = 400
+    WIDTH = 600
     def __init__(self, main_window, error, exit=False):
         super().__init__()
         self.main_window = main_window
@@ -36,7 +36,7 @@ class Error_window(QDialog):
         self.label.setGeometry(0, 0, self.WIDTH-20, self.HEIGHT - self.pushButton.frameSize().height() - 20)
         self.move_to_center(self.label, self, 0, -self.pushButton.frameSize().height())
         self.label.setAlignment(QtCore.Qt.AlignCenter | QtCore.Qt.AlignCenter)
-        self.label.setFont(QFont("Consolas", 18, QFont.Bold))
+        self.label.setFont(QFont("Consolas", 14, QFont.Bold))
         self.label.setWordWrap(True)
 
     def add_button(self):

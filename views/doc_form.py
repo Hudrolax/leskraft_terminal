@@ -1,4 +1,4 @@
-from views.doc_form_ui import Ui_doc_form
+from views.ui.doc_form_ui import Ui_doc_form
 from PyQt5.QtGui import QFont
 from PyQt5.QtCore import Qt, pyqtSlot
 from PyQt5.QtWidgets import QDialog, QApplication, QTableWidgetItem
@@ -11,9 +11,9 @@ class GUI_Doc_Window(Ui_doc_form, LoggerSuper):
     logger = logging.getLogger('Document_Form')
     def custom_setup(self, window):
         self.doc_tbl.setRowCount(1)
-        self.doc_tbl.setColumnCount(5)
+        self.doc_tbl.setColumnCount(7)
 
-        window.resize(1200, 700)
+        window.resize(1920, 700)
         self.init_GUI = True
 
     def set_table_header_style(self):
@@ -40,6 +40,7 @@ class DocumentWindow(QDialog):
         self.showNormal()
         self.center_on_screen()
         self.fill_header()
+        self.fill_table_header()
         self.fill_table()
 
     def center_on_screen(self):
@@ -83,12 +84,14 @@ class DocumentWindow(QDialog):
     def fill_table_header(self):
         if not self.ui.init_GUI:
             return
-        self.ui.doc_tbl.setItem(0, 1, QTableWidgetItem('Номенклатура'))
-        self.ui.doc_tbl.setItem(0, 2, QTableWidgetItem('Код'))
+        self.ui.doc_tbl.setItem(0, 1, QTableWidgetItem('Код'))
+        self.ui.doc_tbl.setItem(0, 2, QTableWidgetItem('Номенклатура'))
         self.ui.doc_tbl.setItem(0, 3, QTableWidgetItem('Количество'))
         self.ui.doc_tbl.setItem(0, 4, QTableWidgetItem('Статус'))
-        # self.ui.doc_tbl.setItem(0, 5, QTableWidgetItem('Отменено'))
-        # self.ui.doc_tbl.setItem(0, 6, QTableWidgetItem('Причина отмены'))
+        self.ui.doc_tbl.setItem(0, 5, QTableWidgetItem('Полка'))
+        self.ui.doc_tbl.setItem(0, 6, QTableWidgetItem('Пол'))
+        # self.ui.doc_tbl.setItem(0, 7, QTableWidgetItem('Отменено'))
+        # self.ui.doc_tbl.setItem(0, 8, QTableWidgetItem('Причина отмены'))
 
     def fill_table(self):
         if not self.ui.init_GUI:
@@ -104,6 +107,8 @@ class DocumentWindow(QDialog):
             self.ui.doc_tbl.setItem(_str, 2, QTableWidgetItem(string.nomenclature.name))
             self.ui.doc_tbl.setItem(_str, 3, QTableWidgetItem(str(string.amount)))
             self.ui.doc_tbl.setItem(_str, 4, QTableWidgetItem(string.status))
+            self.ui.doc_tbl.setItem(_str, 5, QTableWidgetItem(string.adress_shelf))
+            self.ui.doc_tbl.setItem(_str, 6, QTableWidgetItem(string.adress_floor))
 
             # # add checkbox to QTableWidgetItem
             # check_box = QCheckBox(parent=self.ui.doc_tbl)

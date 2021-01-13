@@ -22,6 +22,9 @@ class RFIDScanner(COM_port, LoggerSuper):
     def add_observer(self, observer):
         self.observers.append(observer)
 
+    def remove_observer(self, observer):
+        self.observers.remove(observer)
+
     def send_signal_to_observers(self, card_id):
         for observer in self.observers:
             observer.get_RFID_signal(card_id)
