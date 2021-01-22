@@ -56,8 +56,15 @@ class MainModel(Threaded_class, LoggerSuper):
 
     def get_http_data(self, route, func):
         try:
-            content = requests.get(f'http://{SERVER}/{BASE_NAME}{route}?api_key={API_KEY}',\
-                      auth=(USER, PASSWORD)).content.decode()
+            try:
+                content = requests.get(f'http://{SERVER}/{BASE_NAME}{route}?api_key={API_KEY}',
+                          auth=(USER, PASSWORD)).content.decode()
+            except Exception as e:
+                try:
+                    content = requests.get(f'http://{SERVER2}/{BASE_NAME}{route}?api_key={API_KEY}',
+                                           auth=(USER, PASSWORD)).content.decode()
+                except:
+                    pass
             decoded_json = json.loads(content)
             self.logger.debug(f'Get JSON: {decoded_json}')
             func(decoded_json)

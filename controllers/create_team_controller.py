@@ -18,4 +18,4 @@ class CreateTeam_controller:
 
     def close(self):
         self.main_controller.rfid_scanner.remove_observer(self)
-        self.window.close()
+        self.window.close_window()

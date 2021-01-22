@@ -8,12 +8,6 @@ def parse_json(content):
     print(team_leader)
     print(teammates)
 
-json_str = """{
-               "API_key":"plate1",
-               "team_leader":"123",
-               "teammates": [
-	                {"1234":"Кладовщик"},
-                    {"12345":"Грузчик"}
-	                        ]
-              }"""
-parse_json(json_str)
+teammates = ['123', '234']
+json_str = json.dumps(teammates)
+print(json_str)

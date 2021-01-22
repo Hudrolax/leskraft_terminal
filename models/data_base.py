@@ -160,6 +160,10 @@ class DB(LoggerSuper):
     def documents(self):
         return self._documents
 
+    @property
+    def teams(self):
+        return self._teams
+
     def get_doc(self, link):
         for doc in self._documents:
             if doc.link == link:

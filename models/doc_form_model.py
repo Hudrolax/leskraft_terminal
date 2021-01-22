@@ -1,6 +1,7 @@
 from utility.logger_super import LoggerSuper
 import logging
 from env import SERVER, BASE_NAME, GET_TASK_ROUTE
+from config import CONNECTION_TIMEOUT
 import requests
 
 class DocumentForm_model(LoggerSuper):
@@ -19,14 +20,13 @@ class DocumentForm_model(LoggerSuper):
         return True
 
     def _get_task(self):
-        _TIMEOUT = 10
         try:
             url = f'http://{SERVER}{BASE_NAME}{GET_TASK_ROUTE}'
             headers = {'Content-type': 'application/json',  # Определение типа данных
                         'Accept': 'text/plain',
                         'Authorization': AUTH_BASIC}
             body = {"doc_num":self.doc.num, "doc_date":self.doc.return_date_1c_str(), "team_number":1}
-            answer = requests.post(url=url, json=body, headers=headers, timeout=_TIMEOUT).content.decode()
+            answer = requests.post(url=url, json=body, headers=headers, timeout=CONNECTION_TIMEOUT).content.decode()
             if answer != 'ok':
                 self.logger.error(answer)
             return answer

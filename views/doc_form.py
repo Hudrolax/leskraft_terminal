@@ -110,30 +110,6 @@ class DocumentWindow(QDialog):
             self.ui.doc_tbl.setItem(_str, 5, QTableWidgetItem(string.adress_shelf))
             self.ui.doc_tbl.setItem(_str, 6, QTableWidgetItem(string.adress_floor))
 
-            # # add checkbox to QTableWidgetItem
-            # check_box = QCheckBox(parent=self.ui.doc_tbl)
-            # check_box.string_num = string.num
-            # check_box.reason = string.reason_for_cancellation
-            # if string.cancelled:
-            #     check_box.setCheckState(Qt.Checked)
-            # check_box.stateChanged.connect(self._click_checkbox)
-            # checkbox_layout = QHBoxLayout()
-            # checkbox_layout.addWidget(check_box, 0, Qt.AlignCenter)
-            # checkbox_whole_widget = QWidget()
-            # checkbox_whole_widget.setLayout(checkbox_layout)
-            # self.ui.doc_tbl.setCellWidget(_str, 5, checkbox_whole_widget)
-            #
-            # # add LineEdit to QTableWidgetItem
-            # line_edit = QLineEdit(parent=self.ui.doc_tbl)
-            # line_edit.string_num = string.num
-            # line_edit.setText(string.reason_for_cancellation)
-            # line_edit.setEnabled(string.cancelled)
-            # # check_box.stateChanged.connect(self._click_checkbox)
-            # line_edit_layout = QHBoxLayout()
-            # line_edit_layout.addWidget(line_edit, 0, Qt.AlignCenter)
-            # lineedit_whole_widget = QWidget()
-            # lineedit_whole_widget.setLayout(line_edit_layout)
-            # self.ui.doc_tbl.setCellWidget(_str, 6, lineedit_whole_widget)
             _str += 1
 
         # делаем ресайз колонок по содержимому
@@ -150,7 +126,3 @@ class DocumentWindow(QDialog):
     @pyqtSlot(bool)
     def _stop_work_with_doc(self):
         result = self.controller.stop_work_with_document()
-
-    # def _click_checkbox(self, state):
-    #     result = self.controller.click_checkbox(self.sender().string_num, state == Qt.Checked, self.sender().reason)
-    #     self.fill_table()

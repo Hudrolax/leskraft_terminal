@@ -1,5 +1,9 @@
 from utility.logger_super import LoggerSuper
 import logging
+import json
+import requests
+from env import SERVER, BASE_NAME, ADD_TEAM_ROUTE, AUTH_BASIC, API_KEY
+from config import CONNECTION_TIMEOUT
 
 
 class CreateTeam_model(LoggerSuper):
@@ -25,8 +29,32 @@ class CreateTeam_model(LoggerSuper):
         self.update_window_state()
 
     def send_team_to_1c(self):
-        self.logger.info("Создаем команду на стороне 1С")
-        self.controller.window.set_register_team_screen(False)
+        answer = ''
+        self.logger.info("Создаем бригаду на стороне 1С")
+        try:
+            url = f'http://{SERVER}/{BASE_NAME}{ADD_TEAM_ROUTE}'
+            headers = {'Content-type': 'application/json',  # Определение типа данных
+                       'Accept': 'text/plain',
+                       'Authorization': AUTH_BASIC}
+            teammates_cards = []
+            for employee in self.teammates:
+                teammates_cards.append(employee.card_number)
+            body = {"API_key": API_KEY, "team_leader": self.team_leader.card_number, "teammates": teammates_cards}
+            answer = requests.post(url=url, json=body, headers=headers, timeout=CONNECTION_TIMEOUT).content.decode('utf-8')
+            if answer == 'ok':
+                self.logger.info('Команда зарегистрирована!')
+                result = True
+            else:
+                self.logger.error(answer)
+                result = False
+        except (
+                requests.exceptions.ConnectionError or requests.exceptions.ConnectTimeout or requests.exceptions.BaseHTTPError) as e:
+            self.logger.critical(e)
+            result = False
+        except Exception as e:
+            self.logger.critical(e)
+            result = False
+        self.controller.window.set_register_team_screen(result, answer)
 
     def rfid_code_got(self, card_id):
         employee = self.db.get_employee(card_id)
@@ -36,7 +64,7 @@ class CreateTeam_model(LoggerSuper):
             self.controller.window.employee_not_found_message(card_id)
             return
 
-        # Кладовщик набрал команду и отметился второй за, значит формируем бригаду в 1С
+        # Кладовщик набрал команду и отметился второй раз, значит формируем бригаду в 1С
         if self.team_leader == employee:
             self.send_team_to_1c()
             return

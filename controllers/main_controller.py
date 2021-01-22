@@ -12,9 +12,6 @@ class MainController:
         self.window = MainWindow(self, model)
         self.rfid_scanner = RFIDScanner(RFID_SCANNER_PID)
 
-    def click_get_btn(self):
-        self.model.get_docs()
-
     def click_getdoc_btn(self, doc):
         doc_controller = DocForm_controller(self, doc)
 

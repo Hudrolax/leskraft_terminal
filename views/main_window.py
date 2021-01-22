@@ -11,9 +11,11 @@ import sys
 from time import sleep
 from datetime import datetime
 from env import FULLSCREEN
+import keyboard
 
 class GUI_Main_Window(Ui_MainWindow, LoggerSuper):
     logger = logging.getLogger('Main_Window')
+
     def custom_setup(self, window):
         self.tbl1.setRowCount(1)
         self.tbl1.setColumnCount(13)
@@ -31,7 +33,11 @@ class GUI_Main_Window(Ui_MainWindow, LoggerSuper):
         self.time_lcd_second.setPalette(palette)
         self.time_separator_1.setStyleSheet('color: #00FF00')
         self.time_separator_2.setStyleSheet('color: #00FF00')
-        self.create_team_btn.setText('Создать команду')
+        self.exit_btn.setVisible(not FULLSCREEN)
+
+        self.error_label.setStyleSheet('color: #FF0000')
+        self.error_label.setFont(QFont("Consolas", 24, QFont.Bold))
+        self.error_widget.setVisible(False)
 
     def set_table_header_style(self):
         self.tbl1.item(0, 0).setFont(QFont("Consolas", 18, QFont.Bold))
@@ -45,13 +51,15 @@ class MainWindow(QMainWindow):
         self.controller = controller
         self.model = model
 
+        self._show_connection_error_flag = False
+        self._show_create_team_error_flag = False
+
         # подключаем визуальное представление
         self.ui = GUI_Main_Window()
         self.ui.setupUi(self)
         self.ui.custom_setup(self)
         self.load_style()
 
-        self.ui.get_btn.clicked.connect(self.controller.click_get_btn)
         self.ui.exit_btn.clicked.connect(self.controller.click_exit_btn)
         self.ui.create_team_btn.clicked.connect(self.controller.click_commands_btn)
         # создадим поток обновления ТЧ по таймеру
@@ -76,6 +84,48 @@ class MainWindow(QMainWindow):
         else:
             self.showFullScreen()
         self.fill_header()
+        keyboard.add_hotkey('Ctrl + Alt + 1', self.show_exit_btn)
+
+    def _show_create_team_error(self):
+        self._show_create_team_error_flag = True
+        self._show_error_message('Необходимо сформировать хотя бы одну бригаду!', color='#FF5809', font=24)
+        self.ui.tbl1.setEnabled(False)
+
+    def _hide_create_team_error(self):
+        if self._show_create_team_error_flag:
+            self.ui.tbl1.setEnabled(True)
+            self._hide_error_message()
+            self._show_create_team_error_flag = False
+
+    def _show_connection_error(self):
+        self._show_connection_error_flag = True
+        self._show_error_message('Ошибка связи с сервером!', color='#FF0000', font=24)
+        self.ui.tbl1.setRowCount(1)
+        self.ui.tbl1.update()
+        self.ui.tbl1.setEnabled(False)
+        self.ui.create_team_btn.setEnabled(False)
+        self.ui.teamslist_btn.setEnabled(False)
+
+    def _hide_connection_error(self):
+        if self._show_connection_error_flag:
+            self.ui.create_team_btn.setEnabled(True)
+            self.ui.teamslist_btn.setEnabled(True)
+            self.ui.tbl1.setEnabled(True)
+            self._hide_error_message()
+            self._show_connection_error_flag = False
+
+    def _show_error_message(self, message, color='#FF0000', font=24):
+        self.ui.error_label.setStyleSheet(f'color: {color}')
+        self.ui.error_label.setFont(QFont("Consolas", font, QFont.Bold))
+        self.ui.error_label.setText(message)
+        self.ui.error_widget.setVisible(True)
+
+    def _hide_error_message(self):
+        self.ui.error_label.setText("")
+        self.ui.error_widget.setVisible(False)
+
+    def show_exit_btn(self):
+        self.ui.exit_btn.setVisible(not self.ui.exit_btn.isVisible())
 
     def load_style(self):
         file = QFile(STYLE_PATH)
@@ -143,6 +193,7 @@ class MainWindow(QMainWindow):
             btn.clicked.connect(self._click_get_doc_btn)
             btn.doc = doc
             self.ui.tbl1.setCellWidget(_str, 12, btn)
+            self.ui.tbl1.setRowHeight(_str, 80)
             _str += 1
 
         # делаем ресайз колонок по содержимому
@@ -166,7 +217,16 @@ class MainWindow(QMainWindow):
 
     @QtCore.pyqtSlot()
     def _fill_table_by_timer(self):
-        self.fill_table()
+        if self.model.get_online_status():
+            self._hide_connection_error()
+            self.fill_table()
+        else:
+            self._show_connection_error()
+
+        if len(self.model.db.teams) > 0:
+            self._hide_create_team_error()
+        else:
+            self._show_create_team_error()
 
     def _click_get_doc_btn(self):
         self.controller.click_getdoc_btn(self.sender().doc)

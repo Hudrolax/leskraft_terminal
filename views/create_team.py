@@ -32,6 +32,9 @@ class CreateTeamWindow(QDialog):
         self.model = model
         self.parent = parent
 
+        self._close_window = False
+        """Для потомков: Закрывать окно судя по всему нужно из потока самой формы, иначе иногда виснет!"""
+
         # подключаем визуальное представление
         self.setWindowFlags(Qt.Window | Qt.CustomizeWindowHint)
         self.setModal(True)
@@ -56,6 +59,9 @@ class CreateTeamWindow(QDialog):
         self.table_timer_thread.started.connect(self.table_timer_handler.run)
         self.table_timer_thread.start()
         self._update_table = False
+
+    def close_window(self):
+        self._close_window = True
 
     def maximum_teammates_reached_message(self):
         self.ui.label_2.setText(f'Количество участников бригады не может быть больше {self.model.maximum_teammates+1}')
@@ -103,7 +109,7 @@ class CreateTeamWindow(QDialog):
         self.ui.state_label.setStyleSheet("color: black")
         self._update_table = True
 
-    def set_register_team_screen(self, result):
+    def set_register_team_screen(self, result, answer):
         self.ui.tabWidget.setTabEnabled(0, False)
         self.ui.tabWidget.setTabEnabled(1, False)
         self.ui.tabWidget.setTabEnabled(2, True)
@@ -112,16 +118,15 @@ class CreateTeamWindow(QDialog):
         if result:
             _text = "Команда зарегистрирована"
             self.ui.label_6.setText(_text)
-            self.ui.label_6.setStyleSheet("color: black")
+            self.ui.label_6.setStyleSheet("color: green")
             self.ui.state_label.setText(_text)
-            self.ui.state_label.setStyleSheet("color: black")
+            self.ui.state_label.setStyleSheet("color: green")
         else:
-            _text = "Ошибка регистрации команды"
+            _text = answer
             self.ui.label_6.setText(_text)
             self.ui.label_6.setStyleSheet("color: red")
             self.ui.state_label.setText(_text)
             self.ui.state_label.setStyleSheet("color: red")
-        self._update_table = True
         sleep(3)
         self.controller.close()
 
@@ -143,6 +148,8 @@ class CreateTeamWindow(QDialog):
 
     @QtCore.pyqtSlot()
     def _fill_table_by_timer(self):
+        if self._close_window:
+            self.close()
         self.fill_table()
 
     def fill_table(self):
