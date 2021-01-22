@@ -2,7 +2,7 @@ import requests
 import cups
 
 
-fn = './temp/test.pdf'
+fn = '../temp/test.pdf'
 r = requests.get('http://serverx/test.pdf')
 with open(fn,'wb') as f:
   f.write(r.content)
