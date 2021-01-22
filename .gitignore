@@ -134,4 +134,4 @@ dmypy.json
 /base.sqlite
 
 /leskraft_terminal.txt
-/temp
+/temp/*
