@@ -9,8 +9,8 @@ with open(fn,'wb') as f:
 
 conn = cups.Connection()
 printers = conn.getPrinters()
-printer_name = printers.keys()[0]
 print(printers)
+printer_name = printers.keys()[0]
 
 print(printer_name)
 conn.printFile(printer_name, fn, "", {})
