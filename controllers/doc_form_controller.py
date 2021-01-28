@@ -1,6 +1,8 @@
 from views.doc_form import DocumentWindow
 from models.doc_form_model import DocumentForm_model
 from views.error_message import Error_window
+from utility.print import get_pdf_and_print
+
 
 class DocForm_controller:
     def __init__( self, parent, doc):
@@ -10,6 +12,12 @@ class DocForm_controller:
 
     def click_close_btn(self):
         self.window.close()
+
+    def click_print_btn(self):
+        result = get_pdf_and_print(self.model.doc.link)
+        if result != "":
+            Error_window(self.window, f'Ошибка: {result}')
+
 
     def start_work_with_document(self):
         result = self.model.start_work_with_document()

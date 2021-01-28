@@ -9,7 +9,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1086</width>
+    <width>1275</width>
     <height>781</height>
    </rect>
   </property>
@@ -508,7 +508,7 @@
       </spacer>
      </item>
      <item>
-      <widget class="QPushButton" name="work_button">
+      <widget class="QPushButton" name="printButton">
        <property name="minimumSize">
         <size>
          <width>150</width>
@@ -522,7 +522,7 @@
         </size>
        </property>
        <property name="text">
-        <string>PushButton</string>
+        <string>Печать</string>
        </property>
       </widget>
      </item>

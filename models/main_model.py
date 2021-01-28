@@ -54,17 +54,37 @@ class MainModel(Threaded_class, LoggerSuper):
             else:
                 return
 
+    @staticmethod
+    def get_http_data_static(route, parameters=''):
+        try:
+            answer = requests.get(f'http://{SERVER}/{BASE_NAME}{route}?api_key={API_KEY}{parameters}',
+                                   auth=(USER, PASSWORD))
+            if answer.status_code == 200:
+                return answer.content
+            else:
+                MainModel.logger.error(f'http_get {route} status code {answer.status_code}:{answer.content.decode()}')
+                return None
+        except Exception as e:
+            try:
+                answer =  requests.get(f'http://{SERVER2}/{BASE_NAME}{route}?api_key={API_KEY}{parameters}',
+                                       auth=(USER, PASSWORD))
+                if answer.status_code == 200:
+                    return answer.content
+                else:
+                    MainModel.logger.error(f'http_get {route} status code {answer.status_code}:{answer.content.decode()}')
+                    return None
+            except:
+                return None
+
     def get_http_data(self, route, func):
         try:
-            try:
-                content = requests.get(f'http://{SERVER}/{BASE_NAME}{route}?api_key={API_KEY}',
-                          auth=(USER, PASSWORD)).content.decode()
-            except Exception as e:
-                try:
-                    content = requests.get(f'http://{SERVER2}/{BASE_NAME}{route}?api_key={API_KEY}',
-                                           auth=(USER, PASSWORD)).content.decode()
-                except:
-                    pass
+            content = self.get_http_data_static(route)
+            if content is not None:
+                content = content.decode()
+            else:
+                self.logger.error('content is None')
+                return
+
             decoded_json = json.loads(content)
             self.logger.debug(f'Get JSON: {decoded_json}')
             func(decoded_json)

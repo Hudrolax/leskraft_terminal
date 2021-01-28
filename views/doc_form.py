@@ -36,6 +36,7 @@ class DocumentWindow(QDialog):
         self.ui.setupUi(self)
         self.ui.custom_setup(self)
         self.ui.close_button.clicked.connect(self.controller.click_close_btn)
+        self.ui.printButton.clicked.connect(self.controller.click_print_btn)
 
         self.showNormal()
         self.center_on_screen()
@@ -67,19 +68,6 @@ class DocumentWindow(QDialog):
         self.ui.execute_to.setText(doc.get_execute_to_str())
         self.ui.start_time.setText(doc.get_start_time_str())
         self.ui.end_time.setText(doc.get_end_time_str())
-        try:
-            self.ui.work_button.clicked.disconnect()
-        except:
-            pass
-        if doc.status == "На исполнение":
-            self.ui.work_button.setText('Взять')
-            self.ui.work_button.clicked.connect(self._start_work_with_doc)
-        elif doc.status == "В работе":
-            self.ui.work_button.setText('Завершить')
-            self.ui.work_button.clicked.connect(self._stop_work_with_doc)
-        else:
-            self.ui.work_button.setText('')
-            self.ui.work_button.setEnabled(False)
 
     def fill_table_header(self):
         if not self.ui.init_GUI:
