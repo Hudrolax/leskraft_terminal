@@ -2,7 +2,10 @@ from sys import platform
 if platform == "linux" or platform == "linux2":
     import cups
 import os
-from env import *
+if __name__ == '__main__':
+    from .env import *
+else:
+    from env import *
 import logging
 import requests
 
