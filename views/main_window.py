@@ -11,7 +11,7 @@ import sys
 from time import sleep
 from datetime import datetime
 from env import FULLSCREEN
-import keyboard
+# import keyboard
 
 class GUI_Main_Window(Ui_MainWindow, LoggerSuper):
     logger = logging.getLogger('Main_Window')
@@ -84,7 +84,7 @@ class MainWindow(QMainWindow):
         else:
             self.showFullScreen()
         self.fill_header()
-        keyboard.add_hotkey('Ctrl + Alt + 1', self.show_exit_btn)
+        # keyboard.add_hotkey('Ctrl + Alt + 1', self.show_exit_btn)
 
     def _show_create_team_error(self):
         self._show_create_team_error_flag = True
@@ -124,8 +124,8 @@ class MainWindow(QMainWindow):
         self.ui.error_label.setText("")
         self.ui.error_widget.setVisible(False)
 
-    def show_exit_btn(self):
-        self.ui.exit_btn.setVisible(not self.ui.exit_btn.isVisible())
+    # def show_exit_btn(self):
+    #     self.ui.exit_btn.setVisible(not self.ui.exit_btn.isVisible())
 
     def load_style(self):
         file = QFile(STYLE_PATH)
