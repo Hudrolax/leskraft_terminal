@@ -116,6 +116,17 @@ class DB(LoggerSuper):
         self._employee_connections.append(Employee_connection(employee, team))
 
 # Вспомогательные функции
+    def get_team_by_emloyee_code(self, code):
+        _teams = []
+        for team in self.teams:
+            if team.team_leader.card_number == code and team not in _teams:
+                _teams.append(team)
+
+        for conn in self._employee_connections:
+            if conn.employee.card_number == code and conn.team not in _teams:
+                _teams.append(conn.team)
+        return _teams
+
     def get_team(self, num, date):
         date = date_setter(date)
         for team in self._teams:

@@ -30,11 +30,7 @@ def _get_http_data_static(route, parameters=''):
             return None
 
 def get_pdf_and_print(link):
-    if platform == "linux" or platform == "linux2" or platform == "darwin":
-        file_path = ''
-    else:
-        file_path = ''
-    file_path = file_path + f'./temp/{link}.pdf'
+    file_path = f'./temp/{link}.pdf'
     content = _get_http_data_static(GET_PRINT_FORM_ROUTE, f'&document_id={link}')
     try:
         with open(file_path, 'wb') as f:

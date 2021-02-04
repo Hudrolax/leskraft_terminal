@@ -1,4 +1,4 @@
-from views.create_team import CreateTeamWindow
+from views.create_team_window import CreateTeamWindow
 from models.create_team_model import CreateTeam_model
 
 
@@ -8,6 +8,7 @@ class CreateTeam_controller:
         self.model = CreateTeam_model(self, self.main_controller.model.db)
         self.window = CreateTeamWindow(self, self.model, self.main_controller.window)
         self.main_controller.rfid_scanner.add_observer(self)
+        self.main_controller.bar_scanner.remove_observer(self.main_controller.window)
 
     def get_RFID_signal(self, card_id):
         print(f'get code {card_id}')
@@ -18,4 +19,5 @@ class CreateTeam_controller:
 
     def close(self):
         self.main_controller.rfid_scanner.remove_observer(self)
+        self.main_controller.bar_scanner.add_observer(self.main_controller.window)
         self.window.close_window()

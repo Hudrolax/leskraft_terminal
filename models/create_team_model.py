@@ -1,6 +1,5 @@
 from utility.logger_super import LoggerSuper
 import logging
-import json
 import requests
 from env import SERVER, BASE_NAME, ADD_TEAM_ROUTE, AUTH_BASIC, API_KEY
 from config import CONNECTION_TIMEOUT

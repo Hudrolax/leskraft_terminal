@@ -10,17 +10,29 @@ class BarScanner(COM_port, LoggerSuper):
     """
     Класс BarScanner представляет собой реализацию модели сканера ШК.
     Класс оповещает наблюдателей о событии сканирования
+    Модель наблюдателя должна реализовывать метод get_bar_code, получающий в качестве параметра код
     """
     logger = logging.getLogger('BarScanner')
 
-    def __init__(self, PID, model):
+    def __init__(self, PID):
         super().__init__(name='BarScanner', PID=PID, speed=9600, timeout=500)
-        self.model = model
+        self.observers = []
         self._thread = threading.Thread(target=self._get_bar_code_threaded, args=(), daemon=True)
         self._thread.start()
 
+    def add_observer(self, observer):
+        if observer not in self.observers:
+            self.observers.append(observer)
+
+    def remove_observer(self, observer):
+        if observer in self.observers:
+            self.observers.remove(observer)
+
+    def _send_signal_to_observers(self, bar_code):
+        for observer in self.observers:
+            observer.get_bar_code(bar_code)
+
     def _get_bar_code_threaded(self):
-        sleep(1)
         _last_barcode = None
         _time_last_wait_for_scan = datetime.now()
         _attempts = 0
@@ -28,27 +40,45 @@ class BarScanner(COM_port, LoggerSuper):
             _answer = ""
             if self.initialized:
                 if _last_barcode != '':
-                    self.logger.info('Wait for scan barcode...')
+                    self.logger.debug('Wait for scan barcode...')
                 try:
-                    _answer = self.serial.readline().decode().replace('\n', '')
+                    _answer = self.serial.readline().decode().replace('\r\n', '')
                     if _answer != '':
-                        self.logger.info(f'{datetime.strftime(datetime.now(), "%d.%m.%y %H:%M:%S")}: {repr(_answer)}')
+                        self.logger.debug(f'{datetime.strftime(datetime.now(), "%d.%m.%y %H:%M:%S")}: {repr(_answer)}')
                         _attempts = 0
                 except:
                     self.initialized = False
                     self.inicialize_com_port()
+
                 if _answer != "":
                     if _answer.find('t=') == -1:
-                        self.model.get_permission_by_code(_answer)
+                        self._send_signal_to_observers(_answer)
                     else:
                         self.logger.warning(f'Got wrong code format: {_answer}')
             else:
                 sleep(0.2)
+
             if (datetime.now() - _time_last_wait_for_scan).total_seconds() < 1:
                 _attempts += 1
             else:
                 _attempts = 0
             _time_last_wait_for_scan = datetime.now()
             if _attempts > 50:
-                print("need reboot")
+                self.logger.error("scanner: need reboot")
                 # reboot()
+
+if __name__ == '__main__':
+    WRITE_LOG_TO_FILE = False
+    LOG_FORMAT = '%(name)s (%(levelname)s) %(asctime)s: %(message)s'
+    LOG_LEVEL = logging.INFO
+    logger = logging.getLogger('main')
+
+    if WRITE_LOG_TO_FILE:
+        logging.basicConfig(filename='leskraft_terminal.txt', filemode='w', format=LOG_FORMAT, level=LOG_LEVEL,
+                            datefmt='%d/%m/%y %H:%M:%S')
+    else:
+        logging.basicConfig(format=LOG_FORMAT, level=LOG_LEVEL, datefmt='%d/%m/%y %H:%M:%S')
+
+    bar_scanner = BarScanner("27DD:0201")
+    while True:
+        sleep(1)

@@ -3,7 +3,7 @@ from PyQt5.QtWidgets import QApplication
 from utility.logger_super import LoggerSuper
 from models.main_model import MainModel
 from controllers.main_controller import MainController
-from env import PRINTER_NAME, AUTH_BASIC, API_KEY
+from env import PRINTER_NAME, AUTH_BASIC, API_KEY, WRITE_LOG_TO_FILE, DEBUG_MODE
 import logging
 
 
@@ -19,9 +19,10 @@ class Main(LoggerSuper):
 
 
 if __name__ == '__main__':
-    WRITE_LOG_TO_FILE = False
     LOG_FORMAT = '%(name)s (%(levelname)s) %(asctime)s: %(message)s'
     LOG_LEVEL = logging.INFO
+    if DEBUG_MODE:
+        LOG_LEVEL = logging.DEBUG
     logger = logging.getLogger('main')
 
     if WRITE_LOG_TO_FILE:

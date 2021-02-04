@@ -1,4 +1,4 @@
-from PyQt5.QtWidgets import QMainWindow, QDialog, QTableWidgetItem, QPushButton
+from PyQt5.QtWidgets import QMainWindow, QDialog, QTableWidgetItem, QPushButton, QApplication
 from PyQt5.QtGui import QFont, QPixmap
 from PyQt5 import QtCore, QtGui
 from views.ui.main_ui import Ui_MainWindow
@@ -11,16 +11,18 @@ import sys
 from time import sleep
 from datetime import datetime
 from env import FULLSCREEN
+from utility.qt5_timer import TimerHandler
+from utility.qt5_windows import center_on_screen
 # import keyboard
 
 class GUI_Main_Window(Ui_MainWindow, LoggerSuper):
-    logger = logging.getLogger('Main_Window')
-
     def custom_setup(self, window):
         self.tbl1.setRowCount(1)
         self.tbl1.setColumnCount(13)
 
-        window.resize(1920, 768)
+        resolution = QApplication.desktop().availableGeometry()
+        window.resize(resolution.width(), resolution.height())
+
         pixmap = QPixmap('res/img/logo.png')
         self.logo_label.setPixmap(pixmap)
         self.init_GUI = True
@@ -46,6 +48,7 @@ class GUI_Main_Window(Ui_MainWindow, LoggerSuper):
             self.tbl1.item(0, col).setTextAlignment(QtCore.Qt.AlignCenter | QtCore.Qt.AlignCenter)
 
 class MainWindow(QMainWindow):
+    logger = logging.getLogger('Main_Window')
     def __init__(self, controller, model, parent = None):
         super(QMainWindow, self).__init__(parent)
         self.controller = controller
@@ -64,16 +67,14 @@ class MainWindow(QMainWindow):
         self.ui.create_team_btn.clicked.connect(self.controller.click_commands_btn)
         # создадим поток обновления ТЧ по таймеру
         self.table_timer_thread = QtCore.QThread()
-        self.table_timer_handler = TimerHandler()
-        self.table_timer_handler.delay = 1000
+        self.table_timer_handler = TimerHandler(1000)
         self.table_timer_handler.moveToThread(self.table_timer_thread)
         self.table_timer_handler.timer_signal.connect(self._fill_table_by_timer)
         self.table_timer_thread.started.connect(self.table_timer_handler.run)
         self.table_timer_thread.start()
         # создадим поток обновления часов по таймеру
         self.clock_timer_thread = QtCore.QThread()
-        self.clock_timer_handler = TimerHandler()
-        self.clock_timer_handler.delay = 1000
+        self.clock_timer_handler = TimerHandler(100)
         self.clock_timer_handler.moveToThread(self.clock_timer_thread)
         self.clock_timer_handler.timer_signal.connect(self._fill_clock_by_timer)
         self.clock_timer_thread.started.connect(self.clock_timer_handler.run)
@@ -83,6 +84,7 @@ class MainWindow(QMainWindow):
             self.showNormal()
         else:
             self.showFullScreen()
+        center_on_screen(self)
         self.fill_header()
         # keyboard.add_hotkey('Ctrl + Alt + 1', self.show_exit_btn)
 
@@ -215,6 +217,11 @@ class MainWindow(QMainWindow):
         self.ui.time_lcd_minute.display(format_digit(datetime.now().minute))
         self.ui.time_lcd_second.display(format_digit(datetime.now().second))
 
+        if self.controller.getted_bar_code != '':
+            _bar_code = self.controller.getted_bar_code
+            self.controller.getted_bar_code = ''
+            self._open_doc(_bar_code)
+
     @QtCore.pyqtSlot()
     def _fill_table_by_timer(self):
         if self.model.get_online_status():
@@ -229,14 +236,9 @@ class MainWindow(QMainWindow):
             self._show_create_team_error()
 
     def _click_get_doc_btn(self):
-        self.controller.click_getdoc_btn(self.sender().doc)
+        self.controller.open_document_window(self.sender().doc.link)
 
-
-class TimerHandler(QtCore.QObject):
-    timer_signal = QtCore.pyqtSignal()
-    delay = 1000
-
-    def run(self):
-        while True:
-            self.timer_signal.emit()
-            QtCore.QThread.msleep(self.delay)
+    def _open_doc(self, link):
+        doc = self.model.db.get_doc(link)
+        if doc is not None:
+            self.controller.open_document_window(doc.link)

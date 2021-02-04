@@ -6,7 +6,7 @@ from models.data_base import DB
 from env import *
 import logging
 from utility.threaded_class import Threaded_class
-from views.error_message import Error_window
+from views.error_message_window import Error_window
 from views.main_window import MainWindow
 from config import *
 import threading

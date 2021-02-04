@@ -3,17 +3,36 @@ from controllers.doc_form_controller import DocForm_controller
 from controllers.create_team_controller import CreateTeam_controller
 from utility.threaded_class import Threaded_class
 from controllers.RFID_scanner import RFIDScanner
-from env import RFID_SCANNER_PID
+from controllers.barcode_scanner import BarScanner
+from env import RFID_SCANNER_PID, BAR_SCANNER_PID
 import sys
+import logging
 
 class MainController:
+    logger = logging.getLogger('Main_controller')
     def __init__( self, model):
         self.model = model
-        self.window = MainWindow(self, model)
         self.rfid_scanner = RFIDScanner(RFID_SCANNER_PID)
+        self.rfid_scanner.add_observer(self)
+        self.bar_scanner = BarScanner(BAR_SCANNER_PID)
+        self.bar_scanner.add_observer(self)
+        self.window = MainWindow(self, model)
 
-    def click_getdoc_btn(self, doc):
-        doc_controller = DocForm_controller(self, doc)
+        self.getted_bar_code = ''  # атрибут для хранения принятого баркода от потока сканера
+        self.getted_RFID_code = ''  # атрибут для хранения принятого RFID от потока сканера
+
+    def get_RFID_signal(self, code):
+        self.logger.debug(f'get RFID_code: {code}')
+        self.getted_RFID_code = code  # Помещаем код в атрибут, который проверяется в потоке формы
+
+    def get_bar_code(self, bar_code):
+        if self.window._show_create_team_error_flag or self.window._show_create_team_error_flag or self.window._show_connection_error_flag:
+            return
+        self.logger.debug(f'get bar_code: {bar_code}')
+        self.getted_bar_code = bar_code # Помещаем код в атрибут, который проверяется в потоке формы
+
+    def open_document_window(self, doc_link):
+        doc_controller = DocForm_controller(self, doc_link)
 
     def click_commands_btn(self):
         login_controller = CreateTeam_controller(self)

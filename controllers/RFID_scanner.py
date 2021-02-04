@@ -20,14 +20,16 @@ class RFIDScanner(COM_port, LoggerSuper):
         self._thread.start()
 
     def add_observer(self, observer):
-        self.observers.append(observer)
+        if observer not in self.observers:
+            self.observers.append(observer)
 
     def remove_observer(self, observer):
-        self.observers.remove(observer)
+        if observer in self.observers:
+            self.observers.remove(observer)
 
     def send_signal_to_observers(self, card_id):
         for observer in self.observers:
-            observer.get_RFID_signal(card_id)
+            observer.get_RFID_signal(str(card_id))
 
     def _get_bar_code_threaded(self):
         buffer = b''
