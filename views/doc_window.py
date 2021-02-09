@@ -8,7 +8,9 @@ from utility.logger_super import LoggerSuper
 from time import sleep
 from utility.qt5_timer import TimerHandler
 from utility.qt5_windows import center_on_screen
+from datetime import datetime
 import logging
+from views.choice_team_window import ChoiceTeamWindow
 
 
 class GUI_Doc_Window(Ui_doc_form, LoggerSuper):
@@ -50,10 +52,13 @@ class DocumentWindow(QDialog):
         self.ui.setupUi(self)
         self.ui.custom_setup(self)
         self.ui.close_button.clicked.connect(self.controller.close_window)
-        self.ui.printButton.clicked.connect(self.controller.click_print_btn)
+        self.ui.printButton.clicked.connect(self._print_document)
 
         self.showNormal()
         center_on_screen(self)
+
+        self.choice_team_window = None # Окно выбора команды
+        self.choosed_team = None # Выбранная команда
 
         # создадим поток по таймеру
         self.clock_timer_thread = QtCore.QThread()
@@ -62,6 +67,11 @@ class DocumentWindow(QDialog):
         self.clock_timer_handler.timer_signal.connect(self._timer)
         self.clock_timer_thread.started.connect(self.clock_timer_handler.run)
         self.clock_timer_thread.start()
+        self._update_status = True
+        self._update_status_time = datetime.now()
+
+    def _open_choice_team_window(self, teams):
+        self.choice_team_window = ChoiceTeamWindow(self, teams)
 
     @QtCore.pyqtSlot()
     def _timer(self):
@@ -70,44 +80,68 @@ class DocumentWindow(QDialog):
         self.fill_header()
         self.fill_table_header()
         self.fill_table()
+        if (datetime.now()-self._update_status_time).total_seconds() > 3:
+            self._update_status = True
 
-    def doc(self):
-        return self.model.db.get_doc(self.model.doc_link)
+    def _show_status_message(self, message, color='#960E10', font_size='24'):
+        self._update_status = False
+        self._update_status_time = datetime.now()
+        self.ui.status_bar.setText(message)
+        self.ui.status_bar.setStyleSheet(f'color: {color}; font: bold {font_size}pt \"Consolas\"')
+        return
 
     def _threaded_get_RFID_code(self):
         if self.controller.getted_RFID_code != '':
             _code = self.controller.getted_RFID_code
             self.controller.getted_RFID_code = ''
-            if self.doc().team_number > 0:
+
+            if self.model.doc().team_number > 0:
                 return
 
             _teams = self.model.db.get_team_by_emloyee_code(_code)
             if len(_teams) > 0:
-                self.model.team = _teams[0]
+                if len(_teams) > 1:
+                    self._open_choice_team_window(_teams)
+                    if self.choosed_team is not None:
+                        self.model.team = self.choosed_team
+                        self.choosed_team = None
+                        self.choice_team_window = None
+                else:
+                    self.model.team = _teams[0]
             else:
-                Error_window(self, f'Не найдена бригада с сотрудником с номером карты {_code}')
+                self._show_status_message(f'Не найдена бригада с сотрудником с номером карты {_code}')
 
     def _threaded_get_bar_code(self):
         if self.controller.getted_bar_code != '':
             _code = self.controller.getted_bar_code
             self.controller.getted_bar_code = ''
-            if self.model.team is None and self.doc().team_number == 0:
-                self.ui.status_bar.setText('Сначала отсканируйте карту сотрудника для начала работы!!!')
-                self.ui.status_bar.setStyleSheet('color: #960E10')
+            if self.model.team is None and self.model.doc().team_number == 0:
+                self._show_status_message('Сначала отсканируйте карту сотрудника для начала работы!!!')
                 return
 
             doc = self.model.db.get_doc(_code)
-            if doc is not None and doc.link == self.model.doc_link:
-                self.controller.start_work_with_document()
-                sleep(2)
-                self.controller.close_window()
+            if doc is not None:
+                if doc.link == self.model.doc_link:
+                    result = ''
+                    if self.model.doc().status == 'На исполнение':
+                        result = self.controller.start_work_with_document()
+                    elif self.model.doc().status == 'В работе':
+                        result = self.controller.stop_work_with_document()
+
+                    if result:
+                        self.controller.close_window()
+                    else:
+                        Error_window(self, result)
+                else:
+                    self._show_status_message('Вы осканировали не тот документ!')
+                    return
             else:
-                Error_window(self, f'Не найден документ с кодом {_code}')
+                self._show_status_message(f'Не найден документ с кодом {_code}')
 
     def fill_header(self):
         if not self.ui.init_GUI:
             return
-        doc = self.model.db.get_doc(self.model.doc_link)
+        doc = self.model.doc()
         self.ui.doc_name.setText(str(doc))
         self.ui.storage.setText(str(doc.storage))
         self.ui.date_sending.setText(doc.get_date_sending_str())
@@ -115,6 +149,8 @@ class DocumentWindow(QDialog):
         self.ui.destination.setText(doc.destination)
         self.ui.autos_number.setText(doc.autos_number)
         self.ui.status.setText(doc.status)
+        if doc.status == 'В работе':
+            self.ui.status.setStyleSheet('color: #960E10')
         if doc.team_number > 0:
             self.ui.team_number.setText(str(doc.team_number))
             self.ui.team_number.setStyleSheet('color: #4D0557')
@@ -139,12 +175,17 @@ class DocumentWindow(QDialog):
         else:
             self.ui.start_time.setStyleSheet('color: #FF0000')
 
-        if doc.team_number == 0 and self.model.team is None:
-            self.ui.status_bar.setText('Отсканируйте карту сотрудника для начала работы')
-            self.ui.status_bar.setStyleSheet('color: #960E10; font: bold 24pt \"Consolas\"')
-        elif doc.get_start_time_str() == '':
-            self.ui.status_bar.setText('Отсканируйте документ для начала работы')
-            self.ui.status_bar.setStyleSheet('color: #00FF00; font: bold 24pt \"Consolas\"')
+        # status bar
+        if self._update_status:
+            if doc.team_number == 0 and self.model.team is None:
+                self.ui.status_bar.setText('Отсканируйте карту сотрудника для начала работы')
+                self.ui.status_bar.setStyleSheet('color: #960E10; font: bold 24pt \"Consolas\"')
+            elif doc.get_start_time_str() == '':
+                self.ui.status_bar.setText('Отсканируйте документ для начала работы')
+                self.ui.status_bar.setStyleSheet('color: #00FF00; font: bold 24pt \"Consolas\"')
+            elif doc.status == 'В работе':
+                self.ui.status_bar.setText('Отсканируйте документ для окончания работы')
+                self.ui.status_bar.setStyleSheet('color: #960E10; font: bold 24pt \"Consolas\"')
 
 
     def fill_table_header(self):
@@ -192,3 +233,7 @@ class DocumentWindow(QDialog):
     @pyqtSlot(bool)
     def _stop_work_with_doc(self):
         result = self.controller.stop_work_with_document()
+
+    def _print_document(self):
+        self._show_status_message('Идет печать...')
+        self.controller.click_print_btn()

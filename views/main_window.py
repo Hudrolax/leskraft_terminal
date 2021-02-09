@@ -1,5 +1,5 @@
-from PyQt5.QtWidgets import QMainWindow, QDialog, QTableWidgetItem, QPushButton, QApplication
-from PyQt5.QtGui import QFont, QPixmap
+from PyQt5.QtWidgets import QMainWindow, QDialog, QTableWidgetItem, QPushButton, QApplication, QHeaderView, QGraphicsDropShadowEffect
+from PyQt5.QtGui import QFont, QPixmap, QColor
 from PyQt5 import QtCore, QtGui
 from views.ui.main_ui import Ui_MainWindow
 from utility.threaded_class import Threaded_class
@@ -41,7 +41,25 @@ class GUI_Main_Window(Ui_MainWindow, LoggerSuper):
         self.error_label.setFont(QFont("Consolas", 24, QFont.Bold))
         self.error_widget.setVisible(False)
 
+        self.exit_btn.setVisible(False)
+
     def set_table_header_style(self):
+        self.tbl1.setColumnWidth(0, 30)
+        self.tbl1.setColumnWidth(1, 110)
+        self.tbl1.setColumnWidth(2, 110)
+        self.tbl1.setColumnWidth(3, 100)
+        self.tbl1.setColumnWidth(4, 80)
+        self.tbl1.setColumnWidth(5, 150)
+        self.tbl1.setColumnWidth(6, 120)
+        self.tbl1.setColumnWidth(7, 110)
+        self.tbl1.setColumnWidth(8, 110)
+        self.tbl1.setColumnWidth(9, 150)
+        self.tbl1.setColumnWidth(10, 200)
+        self.tbl1.setColumnWidth(11, 110)
+        self.tbl1.setColumnWidth(12, 150)
+
+        self.tbl1.horizontalHeader().setSectionResizeMode(10, QHeaderView.Stretch)
+
         self.tbl1.item(0, 0).setFont(QFont("Consolas", 18, QFont.Bold))
         for col in range(1, self.tbl1.columnCount()):
             self.tbl1.item(0, col).setFont(QFont("Consolas", 14, QFont.Bold))
@@ -86,7 +104,39 @@ class MainWindow(QMainWindow):
             self.showFullScreen()
         center_on_screen(self)
         self.fill_header()
+        self.set_btn_style()
         # keyboard.add_hotkey('Ctrl + Alt + 1', self.show_exit_btn)
+
+    def set_btn_style(self):
+        self.ui.create_team_btn.setMinimumSize(160, 40)
+        self.ui.create_team_btn.setStyleSheet('background-color: #769782;'
+                                           ' color: #272822;'
+                                           ' font: bold 12pt "Consolas";'
+                                           'border-radius: 5px;'
+                                           'border: 2px solid #272822;')
+        shadow_effect = QGraphicsDropShadowEffect(self.ui.create_team_btn)
+        shadow_effect.setColor(QColor(0, 0, 0, 127))
+        shadow_effect.setYOffset(3)
+        shadow_effect.setXOffset(3)
+        shadow_effect.setBlurRadius(12)
+        self.ui.create_team_btn.setGraphicsEffect(shadow_effect)
+        self.ui.create_team_btn.installEventFilter(self)
+
+    def create_team_btn_push(self):
+        self.ui.create_team_btn.graphicsEffect().setEnabled(False)
+
+    def create_team_btn_unhover(self):
+        self.ui.create_team_btn.graphicsEffect().setEnabled(True)
+
+    def eventFilter(self, obj, event):
+        """
+           Функция перехватывает события объекта. Должна быть инициализирована через self.pushButton.installEventFilter(self)
+        """
+        if obj == self.ui.create_team_btn and event.type() == QtCore.QEvent.MouseButtonPress:
+            self.create_team_btn_push()
+        elif obj == self.ui.create_team_btn and event.type() == QtCore.QEvent.HoverLeave:
+            self.create_team_btn_unhover()
+        return super(MainWindow, self).eventFilter(obj, event)
 
     def _show_create_team_error(self):
         self._show_create_team_error_flag = True
@@ -166,6 +216,7 @@ class MainWindow(QMainWindow):
         self.ui.tbl1.setItem(0, 10, QTableWidgetItem('Направление'))
         self.ui.tbl1.setItem(0, 11, QTableWidgetItem('Номер авто'))
         self.ui.tbl1.setItem(0, 12, QTableWidgetItem(''))
+
         self.ui.set_table_header_style()
         self.ui.tbl1.update()
 
@@ -196,11 +247,14 @@ class MainWindow(QMainWindow):
             btn.doc = doc
             self.ui.tbl1.setCellWidget(_str, 12, btn)
             self.ui.tbl1.setRowHeight(_str, 80)
+
+            for _col in range(0, self.ui.tbl1.columnCount() - 1):
+                self.ui.tbl1.item(_str, _col).setTextAlignment(QtCore.Qt.AlignCenter | QtCore.Qt.AlignCenter)
             _str += 1
 
         # делаем ресайз колонок по содержимому
         sleep(0.01)
-        self.ui.tbl1.resizeColumnsToContents()
+        # self.ui.tbl1.resizeColumnsToContents()
         self.ui.tbl1.update()
 
     @QtCore.pyqtSlot()

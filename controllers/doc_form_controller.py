@@ -29,22 +29,26 @@ class DocForm_controller:
         self.getted_RFID_code = rfid_code  # Помещаем код в атрибут, который проверяется в потоке формы
 
     def click_print_btn(self):
-        result = get_pdf_and_print(self.model.doc.link)
+        result = get_pdf_and_print(self.model.doc_link)
         if result != "":
-            Error_window(self.window, f'Ошибка: {result}')
+            Error_window(self.window, f'{result}')
 
 
     def start_work_with_document(self):
         result = self.model.start_work_with_document()
         if result != 'ok':
-            Error_window(self.window , f'Ошибка: {result}')
+            Error_window(self.window , f'{result}')
             return False
         else:
-            self.main_controller.model.update()
             return True
 
     def stop_work_with_document(self):
-        return self.model.stop_work_with_document()
+        result = self.model.stop_work_with_document()
+        if result != 'ok':
+            Error_window(self.window, f'{result}')
+            return False
+        else:
+            return True
 
     def close_window(self):
         self.main_controller.bar_scanner.add_observer(self.main_controller)

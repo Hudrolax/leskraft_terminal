@@ -4,6 +4,9 @@ QMainWindow{
 QDialog#doc_form{
     background-color: #769782;
 }
+QDialog#choice_team_form{
+    background-color: #BA7A25;
+}
 QDialog#doc_form > QLabel{
     color: black;
     font: bold 12pt \"Consolas\";
@@ -15,7 +18,7 @@ QDialog#doc_form > QLabel#doc_name{
 QTableWidget{
     background-color: #272822;
     selection-background-color: #272822;
-    font: 18pt \"Consolas\";
+    font: 14pt \"Consolas\";
     color: #F8F8F2;
     selection-color: #F8F8F2;
     gridline-color: white;

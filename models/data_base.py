@@ -163,6 +163,14 @@ class DB(LoggerSuper):
                     k += 1
                 print()
 
+    def get_team_employees(self, team):
+        _employees = []
+        for connection in self._employee_connections:
+            if connection.team.num == team.num and connection.team.date == team.date:
+                if connection.employee not in _employees:
+                    _employees.append(connection.employee)
+        return _employees
+
     @property
     def employees(self):
         return self._employees

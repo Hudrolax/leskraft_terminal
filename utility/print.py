@@ -1,6 +1,8 @@
 from sys import platform
 if platform == "linux" or platform == "linux2":
     import cups
+else:
+    from PDFNetPython3.PDFNetPython import *
 import os
 if __name__ != '__main__':
     from env import *
@@ -42,16 +44,41 @@ def get_pdf_and_print(link):
         return error_msg
 
 def print_file(path):
-    if platform == "linux" or platform == "linux2" or platform == "darwin":
-        if os.path.exists(path):
+    if os.path.exists(path):
+        if platform == "linux" or platform == "linux2" or platform == "darwin":
             conn = cups.Connection()
             conn.printFile(PRINTER_NAME, path, "", {})
-            os.remove(path)
-            return ''
         else:
-            return f'Не найден файл для печати {path}'
+            win32_print(path)
+        os.remove(path)
+        return ''
     else:
-        return 'Печать на вашей OS невозможна.'
+        return f'Не найден файл для печати {path}'
+
+def win32_print(path):
+    PDFNet.Initialize()
+
+    doc = PDFDoc(path)
+    doc.InitSecurityHandler()
+
+    # Set our PrinterMode options
+    printerMode = PrinterMode()
+    printerMode.SetCollation(True)
+    printerMode.SetCopyCount(1)
+    printerMode.SetDPI(100)  # regardless of ordering, an explicit DPI setting overrides the OutputQuality setting
+    printerMode.SetDuplexing(PrinterMode.e_Duplex_Auto)
+
+    # If the XPS print path is being used, then the printer spooler file will
+    # ignore the grayscale option and be in full color
+    printerMode.SetOutputColor(PrinterMode.e_OutputColor_Grayscale)
+    printerMode.SetOutputQuality(PrinterMode.e_OutputQuality_Medium)
+    # printerMode.SetNUp(2,1)
+    # printerMode.SetScaleType(PrinterMode.e_ScaleType_FitToOutPage)
+
+    # Print the PDF document to the default printer, using "tiger.pdf" as the document
+    # name, send the file to the printer not to an output file, print all pages, set the printerMode
+    # and don't provide a cancel flag.
+    Print.StartPrintJob(doc, "", doc.GetFileName(), "", None, printerMode, None)
 
 if __name__ == '__main__':
     if platform == "linux" or platform == "linux2":
