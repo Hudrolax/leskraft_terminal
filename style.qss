@@ -24,13 +24,23 @@ QTableWidget{
     gridline-color: white;
     border-radius: 12px;
 }
-//QTableWidget::item{
-//    background-color: #3C3F41;
-//    border-radius: 5px;
-//}
 QDialog#error_dialog{
     background-color: #C73C3C;
     color: #BABABA;
+}
+QPushButton{
+    background-color: #F0B90B;
+    color: black;
+    font: bold 12pt "Consolas";
+    border-radius: 5px;
+    border: 2px solid #FFFFFF;
+}
+QPushButton:hover{
+    background-color: #769782;
+    color: #272822;
+    font: bold 12pt "Consolas";
+    border-radius: 5px;
+    border: 2px solid #272822;
 }
 QPushButton#error_dialog_okButton{
     background-color: #272822;

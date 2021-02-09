@@ -43,19 +43,22 @@ class GUI_Main_Window(Ui_MainWindow, LoggerSuper):
 
         self.exit_btn.setVisible(False)
 
+        self.create_team_btn.setMinimumSize(160, 40)
+        self.teamslist_btn.setMinimumSize(160, 40)
+
     def set_table_header_style(self):
         self.tbl1.setColumnWidth(0, 30)
-        self.tbl1.setColumnWidth(1, 110)
-        self.tbl1.setColumnWidth(2, 110)
-        self.tbl1.setColumnWidth(3, 100)
+        self.tbl1.setColumnWidth(1, 120)
+        self.tbl1.setColumnWidth(2, 120)
+        self.tbl1.setColumnWidth(3, 120)
         self.tbl1.setColumnWidth(4, 80)
         self.tbl1.setColumnWidth(5, 150)
         self.tbl1.setColumnWidth(6, 120)
-        self.tbl1.setColumnWidth(7, 110)
-        self.tbl1.setColumnWidth(8, 110)
+        self.tbl1.setColumnWidth(7, 120)
+        self.tbl1.setColumnWidth(8, 120)
         self.tbl1.setColumnWidth(9, 150)
         self.tbl1.setColumnWidth(10, 200)
-        self.tbl1.setColumnWidth(11, 110)
+        self.tbl1.setColumnWidth(11, 120)
         self.tbl1.setColumnWidth(12, 150)
 
         self.tbl1.horizontalHeader().setSectionResizeMode(10, QHeaderView.Stretch)
@@ -104,39 +107,8 @@ class MainWindow(QMainWindow):
             self.showFullScreen()
         center_on_screen(self)
         self.fill_header()
-        self.set_btn_style()
+
         # keyboard.add_hotkey('Ctrl + Alt + 1', self.show_exit_btn)
-
-    def set_btn_style(self):
-        self.ui.create_team_btn.setMinimumSize(160, 40)
-        self.ui.create_team_btn.setStyleSheet('background-color: #769782;'
-                                           ' color: #272822;'
-                                           ' font: bold 12pt "Consolas";'
-                                           'border-radius: 5px;'
-                                           'border: 2px solid #272822;')
-        shadow_effect = QGraphicsDropShadowEffect(self.ui.create_team_btn)
-        shadow_effect.setColor(QColor(0, 0, 0, 127))
-        shadow_effect.setYOffset(3)
-        shadow_effect.setXOffset(3)
-        shadow_effect.setBlurRadius(12)
-        self.ui.create_team_btn.setGraphicsEffect(shadow_effect)
-        self.ui.create_team_btn.installEventFilter(self)
-
-    def create_team_btn_push(self):
-        self.ui.create_team_btn.graphicsEffect().setEnabled(False)
-
-    def create_team_btn_unhover(self):
-        self.ui.create_team_btn.graphicsEffect().setEnabled(True)
-
-    def eventFilter(self, obj, event):
-        """
-           Функция перехватывает события объекта. Должна быть инициализирована через self.pushButton.installEventFilter(self)
-        """
-        if obj == self.ui.create_team_btn and event.type() == QtCore.QEvent.MouseButtonPress:
-            self.create_team_btn_push()
-        elif obj == self.ui.create_team_btn and event.type() == QtCore.QEvent.HoverLeave:
-            self.create_team_btn_unhover()
-        return super(MainWindow, self).eventFilter(obj, event)
 
     def _show_create_team_error(self):
         self._show_create_team_error_flag = True
