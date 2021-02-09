@@ -48,8 +48,8 @@ class GUI_Main_Window(Ui_MainWindow, LoggerSuper):
 
     def set_table_header_style(self):
         self.tbl1.setColumnWidth(0, 30)
-        self.tbl1.setColumnWidth(1, 120)
-        self.tbl1.setColumnWidth(2, 120)
+        self.tbl1.setColumnWidth(1, 140)
+        self.tbl1.setColumnWidth(2, 140)
         self.tbl1.setColumnWidth(3, 120)
         self.tbl1.setColumnWidth(4, 80)
         self.tbl1.setColumnWidth(5, 150)
