@@ -43,8 +43,8 @@ class GUI_Main_Window(Ui_MainWindow, LoggerSuper):
 
         self.exit_btn.setVisible(False)
 
-        self.create_team_btn.setMinimumSize(160, 40)
-        self.teamslist_btn.setMinimumSize(160, 40)
+        self.create_team_btn.setMinimumSize(160, 60)
+        self.teamslist_btn.setMinimumSize(160, 60)
 
     def set_table_header_style(self):
         self.tbl1.setColumnWidth(0, 30)

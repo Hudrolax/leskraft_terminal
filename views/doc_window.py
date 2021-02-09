@@ -26,6 +26,7 @@ class GUI_Doc_Window(Ui_doc_form, LoggerSuper):
         self.start_time.setText('')
         self.end_time.setText('')
         self.status_bar.setText('')
+        self.close_button.setText('Закрыть')
 
         resolution = QApplication.desktop().availableGeometry()
         window.resize(round(resolution.width()*0.9), round(resolution.height()*0.9))
