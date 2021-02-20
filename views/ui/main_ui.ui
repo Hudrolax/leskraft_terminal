@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1029</width>
-    <height>677</height>
+    <width>1227</width>
+    <height>846</height>
    </rect>
   </property>
   <property name="font">
@@ -196,13 +196,41 @@
       </item>
       <item>
        <widget class="QPushButton" name="create_team_btn">
+        <property name="minimumSize">
+         <size>
+          <width>120</width>
+          <height>60</height>
+         </size>
+        </property>
         <property name="text">
          <string>Создать бригаду</string>
         </property>
        </widget>
       </item>
       <item>
+       <spacer name="horizontalSpacer_3">
+        <property name="orientation">
+         <enum>Qt::Horizontal</enum>
+        </property>
+        <property name="sizeType">
+         <enum>QSizePolicy::Minimum</enum>
+        </property>
+        <property name="sizeHint" stdset="0">
+         <size>
+          <width>30</width>
+          <height>20</height>
+         </size>
+        </property>
+       </spacer>
+      </item>
+      <item>
        <widget class="QPushButton" name="teamslist_btn">
+        <property name="minimumSize">
+         <size>
+          <width>120</width>
+          <height>60</height>
+         </size>
+        </property>
         <property name="text">
          <string>Список бригад</string>
         </property>
@@ -388,7 +416,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>1029</width>
+     <width>1227</width>
      <height>21</height>
     </rect>
    </property>

@@ -70,7 +70,7 @@ class BarScanner(COM_port, LoggerSuper):
 if __name__ == '__main__':
     WRITE_LOG_TO_FILE = False
     LOG_FORMAT = '%(name)s (%(levelname)s) %(asctime)s: %(message)s'
-    LOG_LEVEL = logging.INFO
+    LOG_LEVEL = logging.DEBUG
     logger = logging.getLogger('main')
 
     if WRITE_LOG_TO_FILE:
@@ -79,6 +79,6 @@ if __name__ == '__main__':
     else:
         logging.basicConfig(format=LOG_FORMAT, level=LOG_LEVEL, datefmt='%d/%m/%y %H:%M:%S')
 
-    bar_scanner = BarScanner("27DD:0201")
+    bar_scanner = BarScanner("2DD6:23AA")
     while True:
         sleep(1)
