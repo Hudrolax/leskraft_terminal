@@ -44,7 +44,7 @@ class BarScanner(COM_port, LoggerSuper):
                 try:
                     _answer = self.serial.readline().decode().replace('\r\n', '')
                     if _answer != '':
-                        self.logger.debug(f'{datetime.strftime(datetime.now(), "%d.%m.%y %H:%M:%S")}: {repr(_answer)}')
+                        self.logger.info(f'{datetime.strftime(datetime.now(), "%d.%m.%y %H:%M:%S")}: {repr(_answer)}')
                         _attempts = 0
                 except:
                     self.initialized = False
