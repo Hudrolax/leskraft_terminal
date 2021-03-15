@@ -1,4 +1,4 @@
-from PyQt5.QtWidgets import QMainWindow, QDialog, QTableWidgetItem, QPushButton, QApplication, QHeaderView, QGraphicsDropShadowEffect
+from PyQt5.QtWidgets import QMainWindow, QDialog, QTableWidgetItem, QPushButton, QApplication, QHeaderView
 from PyQt5.QtGui import QFont, QPixmap, QColor
 from PyQt5 import QtCore, QtGui
 from views.ui.main_ui import Ui_MainWindow
@@ -10,9 +10,11 @@ from utility.logger_super import LoggerSuper
 import sys
 from time import sleep
 from datetime import datetime
-from env import FULLSCREEN
+from env import FULLSCREEN,PRINTER_NAME,RFID_SCANNER_PID,BAR_SCANNER_PID
 from utility.qt5_timer import TimerHandler
 from utility.qt5_windows import center_on_screen
+from utility.print import find_printer_by_name
+from utility.com_ports import find_hwid
 # import keyboard
 
 class GUI_Main_Window(Ui_MainWindow, LoggerSuper):
@@ -27,14 +29,15 @@ class GUI_Main_Window(Ui_MainWindow, LoggerSuper):
         self.logo_label.setPixmap(pixmap)
         self.init_GUI = True
 
+        clock_separator_color = '#000000'
         palette = self.time_lcd_hour.palette()
-        palette.setColor(palette.Light, QtGui.QColor(0, 255, 0))
-        palette.setColor(palette.Dark, QtGui.QColor(0, 255, 0))
+        palette.setColor(palette.Light, QtGui.QColor(150, 150, 150))
+        palette.setColor(palette.Dark, QtGui.QColor(150, 150, 150))
         self.time_lcd_hour.setPalette(palette)
         self.time_lcd_minute.setPalette(palette)
         self.time_lcd_second.setPalette(palette)
-        self.time_separator_1.setStyleSheet('color: #00FF00')
-        self.time_separator_2.setStyleSheet('color: #00FF00')
+        self.time_separator_1.setStyleSheet(f'color: {clock_separator_color}')
+        self.time_separator_2.setStyleSheet(f'color: {clock_separator_color}')
 
         self.error_label.setStyleSheet('color: #FF0000')
         self.error_label.setFont(QFont("Consolas", 24, QFont.Bold))
@@ -111,7 +114,7 @@ class MainWindow(QMainWindow):
 
     def _show_create_team_error(self):
         self._show_create_team_error_flag = True
-        self._show_error_message('Необходимо сформировать хотя бы одну бригаду!', color='#FF5809', font=24)
+        self._show_error_message('Необходимо сформировать хотя бы одну бригаду!', color='#FF0000', font=24)
         self.ui.tbl1.setEnabled(False)
 
     def _hide_create_team_error(self):
@@ -146,6 +149,42 @@ class MainWindow(QMainWindow):
     def _hide_error_message(self):
         self.ui.error_label.setText("")
         self.ui.error_widget.setVisible(False)
+
+    def _update_statusbar(self):
+        ok_color = '#006117'
+        ok_text = 'Ok'
+        error_color = '#FF0000'
+        error_text = 'ERROR'
+
+        if find_printer_by_name(PRINTER_NAME):
+            self.ui.val_printer.setStyleSheet(f'color: {ok_color}')
+            self.ui.val_printer.setText(ok_text)
+        else:
+            self.ui.val_printer.setStyleSheet(f'color: {error_color}')
+            self.ui.val_printer.setText(error_text)
+
+        if self.model.get_online_status():
+            self.ui.val_server.setStyleSheet(f'color: {ok_color}')
+            self.ui.val_server.setText(ok_text)
+        else:
+            self.ui.val_server.setStyleSheet(f'color: {error_color}')
+            self.ui.val_server.setText(error_text)
+
+        if find_hwid(BAR_SCANNER_PID):
+            self.ui.val_qr.setStyleSheet(f'color: {ok_color}')
+            self.ui.val_qr.setText(ok_text)
+        else:
+            self.ui.val_qr.setStyleSheet(f'color: {error_color}')
+            self.ui.val_qr.setText(error_text)
+
+        if find_hwid(RFID_SCANNER_PID):
+            self.ui.val_rfid.setStyleSheet(f'color: {ok_color}')
+            self.ui.val_rfid.setText(ok_text)
+        else:
+            self.ui.val_rfid.setStyleSheet(f'color: {error_color}')
+            self.ui.val_rfid.setText(error_text)
+
+
 
     # def show_exit_btn(self):
     #     self.ui.exit_btn.setVisible(not self.ui.exit_btn.isVisible())
@@ -259,6 +298,7 @@ class MainWindow(QMainWindow):
             self._hide_create_team_error()
         else:
             self._show_create_team_error()
+        self._update_statusbar()
 
     def _click_get_doc_btn(self):
         self.controller.open_document_window(self.sender().doc.link)

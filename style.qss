@@ -1,8 +1,8 @@
 QMainWindow{
-    background-color: #3C3F41;
+    background-color: white;
 }
 QDialog#doc_form{
-    background-color: #769782;
+    background-color: wheat;
 }
 QDialog#choice_team_form{
     background-color: #BA7A25;
@@ -16,12 +16,12 @@ QDialog#doc_form > QLabel#doc_name{
     font: bold 18pt \"Consolas\";
 }
 QTableWidget{
-    background-color: #272822;
-    selection-background-color: #272822;
+    background-color: whitesmoke;
+    selection-background-color: whitesmoke;
     font: 14pt \"Consolas\";
-    color: #F8F8F2;
-    selection-color: #F8F8F2;
-    gridline-color: white;
+    color: black;
+    selection-color: black;
+    gridline-color: black;
     border-radius: 12px;
 }
 QDialog#error_dialog{
@@ -29,14 +29,14 @@ QDialog#error_dialog{
     color: #BABABA;
 }
 QPushButton{
-    background-color: #F0B90B;
+    background-color: #769782;
     color: black;
     font: bold 14pt "Consolas";
     border-radius: 8px;
     border: 2px solid #FFFFFF;
 }
 QPushButton:hover{
-    background-color: #F0E80C;
+    background-color: #A9DEB5;
     color: black;
     font: bold 14pt "Consolas";
     border-radius: 8px;

@@ -32,6 +32,14 @@ class COM_port:
             if not self.initialized:
                 self.logger.critical(f'{self.name} initialize error!!! PID {self.PID} does not exist')
 
+
+def find_hwid(hwid):
+    _ports = list(lp.comports())
+    for _port in _ports:
+        if str(_port.hwid).find(hwid) > -1:
+            return True
+    return False
+
 if __name__ == '__main__':
     print('Список устройств COM:')
     _ports = list(lp.comports())

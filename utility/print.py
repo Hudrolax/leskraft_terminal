@@ -55,6 +55,15 @@ def print_file(path):
     else:
         return f'Не найден файл для печати {path}'
 
+def find_printer_by_name(name):
+    if platform == "linux" or platform == "linux2":
+        conn = cups.Connection()
+        printers = conn.getPrinters()
+        for printer in printers:
+            if str(printer).find(name) > -1:
+                return True
+    return False
+
 def win32_print(path):
     PDFNet.Initialize()
 
