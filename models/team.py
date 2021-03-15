@@ -1,5 +1,4 @@
-from utility.util import date_setter
-
+from utility.util import date_setter, return_date_str
 
 class Employee:
     def __init__(self, name, card_number, role):
@@ -35,6 +34,9 @@ class Team:
         self._date = date_setter(date)
         self.team_leader = team_leader
         self.terminal_api = terminal_api
+
+    def date_str(self):
+        return return_date_str(self._date)
 
     @property
     def date(self):

@@ -88,6 +88,7 @@ class MainWindow(QMainWindow):
 
         self.ui.exit_btn.clicked.connect(self.controller.click_exit_btn)
         self.ui.create_team_btn.clicked.connect(self.controller.click_commands_btn)
+        self.ui.teamslist_btn.clicked.connect(self.controller.click_teamslist_btn)
         # создадим поток обновления ТЧ по таймеру
         self.table_timer_thread = QtCore.QThread()
         self.table_timer_handler = TimerHandler(1000)

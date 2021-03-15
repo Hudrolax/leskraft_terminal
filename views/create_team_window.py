@@ -16,7 +16,11 @@ class GUI_Login_Window(Ui_Login, LoggerSuper):
         self.tbl.setStyleSheet("font: 12pt \"Consolas\";")
         self.tbl.setSortingEnabled(False)
 
-        window.resize(640, 480)
+        width = 640
+        hight = 480
+        window.setMinimumSize(width, hight)
+        window.setMaximumSize(width, hight)
+        window.resize(width, hight)
         self.init_GUI = True
 
     def set_table_header_style(self):

@@ -4,6 +4,14 @@ from datetime import datetime
 DATE_FORMAT = '%d.%m.%Y %H:%M:%S'
 DATE_FORMAT_1C = '%Y%m%d%H%M%S'
 DATE_FORMAT_SQL = '%Y-%m-%d %H:%M:%S'
+
+
+def return_date_str(date):
+    if value_filled(date):
+        return datetime.strftime(date, DATE_FORMAT)
+    else:
+        return ""
+
 def date_setter(date):
     if isinstance(date, datetime):
         return date

@@ -1,5 +1,11 @@
 QMainWindow{
-    background-color: white;
+    background-color: whitesmoke;
+}
+QDialog#Login{
+    background-color: wheat;
+}
+QDialog#team_list{
+    background-color: wheat;
 }
 QDialog#doc_form{
     background-color: wheat;
@@ -16,8 +22,8 @@ QDialog#doc_form > QLabel#doc_name{
     font: bold 18pt \"Consolas\";
 }
 QTableWidget{
-    background-color: whitesmoke;
-    selection-background-color: whitesmoke;
+    background-color: white;
+    selection-background-color: white;
     font: 14pt \"Consolas\";
     color: black;
     selection-color: black;

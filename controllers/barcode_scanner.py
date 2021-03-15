@@ -64,7 +64,7 @@ class BarScanner(COM_port, LoggerSuper):
                 _attempts = 0
             _time_last_wait_for_scan = datetime.now()
             if _attempts > 50:
-                self.logger.error("scanner: need reboot")
+                self.logger.debug("scanner: need reboot")
                 # reboot()
 
 if __name__ == '__main__':

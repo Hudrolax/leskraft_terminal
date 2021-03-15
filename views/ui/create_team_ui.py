@@ -23,6 +23,7 @@ class Ui_Login(object):
         spacerItem = QtWidgets.QSpacerItem(40, 20, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Minimum)
         self.horizontalLayout_7.addItem(spacerItem)
         self.exit_btn = QtWidgets.QPushButton(Login)
+        self.exit_btn.setMinimumSize(QtCore.QSize(100, 40))
         self.exit_btn.setObjectName("exit_btn")
         self.horizontalLayout_7.addWidget(self.exit_btn)
         self.verticalLayout_2.addLayout(self.horizontalLayout_7)
