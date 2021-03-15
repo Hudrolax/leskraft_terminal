@@ -35,13 +35,12 @@ class GUI_Main_Window(Ui_MainWindow, LoggerSuper):
         self.time_lcd_second.setPalette(palette)
         self.time_separator_1.setStyleSheet('color: #00FF00')
         self.time_separator_2.setStyleSheet('color: #00FF00')
-        self.exit_btn.setVisible(not FULLSCREEN)
 
         self.error_label.setStyleSheet('color: #FF0000')
         self.error_label.setFont(QFont("Consolas", 24, QFont.Bold))
         self.error_widget.setVisible(False)
 
-        self.exit_btn.setVisible(False)
+        self.exit_btn.setVisible(TEST_MODE)
 
         self.create_team_btn.setMinimumSize(160, 60)
         self.teamslist_btn.setMinimumSize(160, 60)
