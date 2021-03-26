@@ -4,7 +4,7 @@ from PyQt5 import QtCore, QtGui
 from views.ui.main_ui import Ui_MainWindow
 from utility.threaded_class import Threaded_class
 from config import *
-from PyQt5.QtCore import QFile, QTextStream
+from PyQt5.QtCore import QFile, QTextStream, Qt
 import logging
 from utility.logger_super import LoggerSuper
 import sys
@@ -48,6 +48,8 @@ class GUI_Main_Window(Ui_MainWindow, LoggerSuper):
         self.create_team_btn.setMinimumSize(160, 60)
         self.teamslist_btn.setMinimumSize(160, 60)
 
+        self.rebootButton.setStyleSheet('background-color: #FF0000;')
+
     def set_table_header_style(self):
         self.tbl1.setColumnWidth(0, 30)
         self.tbl1.setColumnWidth(1, 140)
@@ -85,6 +87,7 @@ class MainWindow(QMainWindow):
         self.ui.setupUi(self)
         self.ui.custom_setup(self)
         self.load_style()
+        self.hide_reboot_btn()
 
         self.ui.exit_btn.clicked.connect(self.controller.click_exit_btn)
         self.ui.create_team_btn.clicked.connect(self.controller.click_commands_btn)
@@ -108,6 +111,7 @@ class MainWindow(QMainWindow):
             self.showNormal()
         else:
             self.showFullScreen()
+        self.setCursor(Qt.BlankCursor)
         center_on_screen(self)
         self.fill_header()
 
@@ -151,11 +155,19 @@ class MainWindow(QMainWindow):
         self.ui.error_label.setText("")
         self.ui.error_widget.setVisible(False)
 
+    def show_reboot_btn(self):
+        self.ui.rebootButton.setVisible(True)
+
+    def hide_reboot_btn(self):
+        self.ui.rebootButton.setVisible(False)
+
     def _update_statusbar(self):
         ok_color = '#006117'
         ok_text = 'Ok'
         error_color = '#FF0000'
         error_text = 'ERROR'
+
+        error = False
 
         if find_printer_by_name(PRINTER_NAME):
             self.ui.val_printer.setStyleSheet(f'color: {ok_color}')
@@ -163,6 +175,7 @@ class MainWindow(QMainWindow):
         else:
             self.ui.val_printer.setStyleSheet(f'color: {error_color}')
             self.ui.val_printer.setText(error_text)
+            error = True
 
         if self.model.get_online_status():
             self.ui.val_server.setStyleSheet(f'color: {ok_color}')
@@ -170,6 +183,7 @@ class MainWindow(QMainWindow):
         else:
             self.ui.val_server.setStyleSheet(f'color: {error_color}')
             self.ui.val_server.setText(error_text)
+            error = True
 
         if find_hwid(BAR_SCANNER_PID):
             self.ui.val_qr.setStyleSheet(f'color: {ok_color}')
@@ -177,6 +191,7 @@ class MainWindow(QMainWindow):
         else:
             self.ui.val_qr.setStyleSheet(f'color: {error_color}')
             self.ui.val_qr.setText(error_text)
+            error = True
 
         if find_hwid(RFID_SCANNER_PID):
             self.ui.val_rfid.setStyleSheet(f'color: {ok_color}')
@@ -184,6 +199,12 @@ class MainWindow(QMainWindow):
         else:
             self.ui.val_rfid.setStyleSheet(f'color: {error_color}')
             self.ui.val_rfid.setText(error_text)
+            error = True
+
+        if error:
+            self.show_reboot_btn()
+        else:
+            self.hide_reboot_btn()
 
 
 

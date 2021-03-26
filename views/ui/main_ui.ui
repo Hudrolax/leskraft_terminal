@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1227</width>
+    <width>1295</width>
     <height>846</height>
    </rect>
   </property>
@@ -398,6 +398,19 @@
        </layout>
       </item>
       <item>
+       <widget class="QPushButton" name="rebootButton">
+        <property name="minimumSize">
+         <size>
+          <width>150</width>
+          <height>40</height>
+         </size>
+        </property>
+        <property name="text">
+         <string>Перезагрузить</string>
+        </property>
+       </widget>
+      </item>
+      <item>
        <spacer name="horizontalSpacer_4">
         <property name="orientation">
          <enum>Qt::Horizontal</enum>
@@ -583,7 +596,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>1227</width>
+     <width>1295</width>
      <height>21</height>
     </rect>
    </property>

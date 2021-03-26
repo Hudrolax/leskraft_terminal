@@ -6,6 +6,7 @@ from utility.threaded_class import Threaded_class
 from controllers.RFID_scanner import RFIDScanner
 from controllers.barcode_scanner import BarScanner
 from env import RFID_SCANNER_PID, BAR_SCANNER_PID
+from utility.reboot import reboot
 import sys
 import logging
 
@@ -40,6 +41,10 @@ class MainController:
 
     def click_teamslist_btn(self):
         team_list_controller = TeamList_controller(self)
+
+    def click_reboot_btn(self):
+        self.logger.info('User pressed the reboot button!')
+        reboot()
 
     def click_exit_btn(self):
         Threaded_class.stop()
