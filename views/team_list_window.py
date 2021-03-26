@@ -6,6 +6,7 @@ from PyQt5 import QtCore
 from utility.logger_super import LoggerSuper
 import logging
 from time import sleep
+from config import TEST_MODE
 
 
 class GUI_Login_Window(Ui_team_list, LoggerSuper):
@@ -49,6 +50,8 @@ class TeamListWindow(QDialog):
         self.ui.exitButton.clicked.connect(self.controller.close)
 
         self.showNormal()
+        if not TEST_MODE:
+            self.setCursor(Qt.BlankCursor)
         self.fill_table_header()
         self.center_on_screen()
 

@@ -111,7 +111,8 @@ class MainWindow(QMainWindow):
             self.showNormal()
         else:
             self.showFullScreen()
-        self.setCursor(Qt.BlankCursor)
+        if not TEST_MODE:
+            self.setCursor(Qt.BlankCursor)
         center_on_screen(self)
         self.fill_header()
 

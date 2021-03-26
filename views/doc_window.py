@@ -11,6 +11,7 @@ from utility.qt5_windows import center_on_screen
 from datetime import datetime
 import logging
 from views.choice_team_window import ChoiceTeamWindow
+from config import TEST_MODE
 
 
 class GUI_Doc_Window(Ui_doc_form, LoggerSuper):
@@ -56,6 +57,8 @@ class DocumentWindow(QDialog):
         self.ui.printButton.clicked.connect(self._print_document)
 
         self.showNormal()
+        if not TEST_MODE:
+            self.setCursor(Qt.BlankCursor)
         center_on_screen(self)
 
         self.choice_team_window = None # Окно выбора команды

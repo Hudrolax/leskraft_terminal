@@ -6,6 +6,7 @@ from PyQt5 import QtCore
 from utility.logger_super import LoggerSuper
 import logging
 from time import sleep
+from config import TEST_MODE
 
 
 class GUI_Login_Window(Ui_Login, LoggerSuper):
@@ -16,7 +17,7 @@ class GUI_Login_Window(Ui_Login, LoggerSuper):
         self.tbl.setStyleSheet("font: 12pt \"Consolas\";")
         self.tbl.setSortingEnabled(False)
 
-        width = 640
+        width = 800
         hight = 480
         window.setMinimumSize(width, hight)
         window.setMaximumSize(width, hight)
@@ -51,6 +52,8 @@ class CreateTeamWindow(QDialog):
         self.ui.pushButton.clicked.connect(self._btn_register_team_clicked)
 
         self.showNormal()
+        if not TEST_MODE:
+            self.setCursor(Qt.BlankCursor)
         self.fill_table_header()
         self.center_on_screen()
 
