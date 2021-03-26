@@ -131,6 +131,11 @@ class DocumentWindow(QDialog):
                         result = self.controller.start_work_with_document()
                     elif self.model.doc().status == 'В работе':
                         result = self.controller.stop_work_with_document()
+                    elif self.model.doc().status == 'Выполнено':
+                        self._show_status_message('Задание уже выполнено')
+                        return
+                    else:
+                        result = 'Неизвестная ошибка'
 
                     if result:
                         self.controller.close_window()
