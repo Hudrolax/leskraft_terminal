@@ -137,9 +137,9 @@ class MainWindow(QMainWindow):
         self.ui.tbl1.update()
         self._block_tbl = True
         self.ui.create_team_btn.setEnabled(False)
-        self.ui.create_team_btn.setStyleSheet('background-color: #87939A;')
+        self.ui.create_team_btn.setStyleSheet('background-color: #87939A;') # grey btn
         self.ui.teamslist_btn.setEnabled(False)
-        self.ui.teamslist_btn.setStyleSheet('background-color: #87939A;')
+        self.ui.teamslist_btn.setStyleSheet('background-color: #87939A;') # grey btn
 
 
     def _hide_connection_error(self):
@@ -261,7 +261,6 @@ class MainWindow(QMainWindow):
     def fill_table(self):
         if not self.ui.init_GUI:
             return
-        self.ui.tbl1.setEnabled(self._block_tbl)
         self.ui.tbl1.setRowCount(len(self.model.db.documents) + 1)
         _str = 1
         for doc in self.model.db.documents:
@@ -285,7 +284,7 @@ class MainWindow(QMainWindow):
             btn.clicked.connect(self._click_get_doc_btn)
             btn.doc = doc
             if self._block_tbl:
-                btn.setStyleSheet('background-color: #87939A;')
+                btn.setStyleSheet('background-color: #87939A;') # grey btn
             self.ui.tbl1.setCellWidget(_str, 12, btn)
             self.ui.tbl1.setRowHeight(_str, 80)
 
@@ -324,6 +323,7 @@ class MainWindow(QMainWindow):
             self.fill_table()
         else:
             self._show_connection_error()
+        self.ui.tbl1.setEnabled(not self._block_tbl)
 
         if len(self.model.db.teams) > 0:
             self._hide_create_team_error()
