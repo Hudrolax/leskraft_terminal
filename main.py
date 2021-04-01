@@ -39,5 +39,8 @@ if __name__ == '__main__':
     elif API_KEY == "":
         print('В env.py не задан API_KEY')
     else:
-        main_app = Main()
-        sys.exit(main_app.run())
+        try:
+            main_app = Main()
+            sys.exit(main_app.run())
+        except Exception as ex:
+            logger.critical(ex)
