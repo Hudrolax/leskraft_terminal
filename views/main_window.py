@@ -81,6 +81,7 @@ class MainWindow(QMainWindow):
 
         self._show_connection_error_flag = False
         self._show_create_team_error_flag = False
+        self._block_tbl = False
 
         # подключаем визуальное представление
         self.ui = GUI_Main_Window()
@@ -121,11 +122,11 @@ class MainWindow(QMainWindow):
     def _show_create_team_error(self):
         self._show_create_team_error_flag = True
         self._show_error_message('Необходимо сформировать хотя бы одну бригаду!', color='#FF0000', font=24)
-        self.ui.tbl1.setEnabled(False)
+        self._block_tbl = True
 
     def _hide_create_team_error(self):
         if self._show_create_team_error_flag:
-            self.ui.tbl1.setEnabled(True)
+            self._block_tbl = False
             self._hide_error_message()
             self._show_create_team_error_flag = False
 
@@ -134,15 +135,19 @@ class MainWindow(QMainWindow):
         self._show_error_message('Ошибка связи с сервером!', color='#FF0000', font=24)
         self.ui.tbl1.setRowCount(1)
         self.ui.tbl1.update()
-        self.ui.tbl1.setEnabled(False)
+        self._block_tbl = True
         self.ui.create_team_btn.setEnabled(False)
+        self.ui.create_team_btn.setStyleSheet('background-color: #87939A;')
         self.ui.teamslist_btn.setEnabled(False)
+        self.ui.teamslist_btn.setStyleSheet('background-color: #87939A;')
+
 
     def _hide_connection_error(self):
         if self._show_connection_error_flag:
             self.ui.create_team_btn.setEnabled(True)
             self.ui.teamslist_btn.setEnabled(True)
-            self.ui.tbl1.setEnabled(True)
+            self.load_style()
+            self._block_tbl = False
             self._hide_error_message()
             self._show_connection_error_flag = False
 
@@ -256,6 +261,7 @@ class MainWindow(QMainWindow):
     def fill_table(self):
         if not self.ui.init_GUI:
             return
+        self.ui.tbl1.setEnabled(self._block_tbl)
         self.ui.tbl1.setRowCount(len(self.model.db.documents) + 1)
         _str = 1
         for doc in self.model.db.documents:
@@ -278,6 +284,8 @@ class MainWindow(QMainWindow):
             btn.setText('Открыть')
             btn.clicked.connect(self._click_get_doc_btn)
             btn.doc = doc
+            if self._block_tbl:
+                btn.setStyleSheet('background-color: #87939A;')
             self.ui.tbl1.setCellWidget(_str, 12, btn)
             self.ui.tbl1.setRowHeight(_str, 80)
 
