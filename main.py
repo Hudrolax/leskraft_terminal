@@ -5,6 +5,7 @@ from models.main_model import MainModel
 from controllers.main_controller import MainController
 from env import PRINTER_NAME, AUTH_BASIC, API_KEY, WRITE_LOG_TO_FILE, LOG_LEVEL
 import logging
+from datetime import datetime
 
 
 class Main(LoggerSuper):
