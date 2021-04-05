@@ -272,6 +272,7 @@ class MainWindow(QMainWindow):
         self.ui.tbl1.setRowCount(len(self.model.db.documents) + 1)
         _str = 1
         for doc in self.model.db.documents:
+            _blnk = self._tbl_blink
             if doc.status != "На исполнение":
                 self._tbl_blink = False
 
@@ -302,6 +303,7 @@ class MainWindow(QMainWindow):
             for _col in range(0, self.ui.tbl1.columnCount() - 1):
                 self.ui.tbl1.item(_str, _col).setTextAlignment(QtCore.Qt.AlignCenter | QtCore.Qt.AlignCenter)
             _str += 1
+            self._tbl_blink = _blnk
 
         self._tbl_blink = not self._tbl_blink
         # делаем ресайз колонок по содержимому
