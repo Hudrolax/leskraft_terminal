@@ -56,12 +56,16 @@ def print_file(path):
         return f'Не найден файл для печати {path}'
 
 def find_printer_by_name(name):
-    if platform == "linux" or platform == "linux2":
-        conn = cups.Connection()
-        printers = conn.getPrinters()
-        for printer in printers:
-            if str(printer).find(name) > -1:
-                return True
+    try:
+        if platform == "linux" or platform == "linux2":
+            conn = cups.Connection()
+            printers = conn.getPrinters()
+            for printer in printers:
+                if str(printer).find(name) > -1:
+                    return True
+    except Exception as ex:
+        logging.error(ex)
+        return False
     return False
 
 def win32_print(path):

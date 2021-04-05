@@ -34,10 +34,13 @@ class COM_port:
 
 
 def find_hwid(hwid):
-    _ports = list(lp.comports())
-    for _port in _ports:
-        if str(_port.hwid).find(hwid) > -1:
-            return True
+    try:
+        _ports = list(lp.comports())
+        for _port in _ports:
+            if str(_port.hwid).find(hwid) > -1:
+                return True
+    except Exception as ex:
+        return False
     return False
 
 if __name__ == '__main__':
