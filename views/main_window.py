@@ -82,6 +82,7 @@ class MainWindow(QMainWindow):
         self._show_connection_error_flag = False
         self._show_create_team_error_flag = False
         self._block_tbl = False
+        self._tbl_blink = False
 
         # подключаем визуальное представление
         self.ui = GUI_Main_Window()
@@ -258,27 +259,37 @@ class MainWindow(QMainWindow):
         self.ui.set_table_header_style()
         self.ui.tbl1.update()
 
+    def _get_tbl_item(self, val):
+        _blink_color = QtGui.QColor(255, 0, 0, 127) # light red
+        _item = QTableWidgetItem(str(val))
+        if self._tbl_blink:
+            _item.setBackground(_blink_color)
+        return _item
+
     def fill_table(self):
         if not self.ui.init_GUI:
             return
         self.ui.tbl1.setRowCount(len(self.model.db.documents) + 1)
         _str = 1
         for doc in self.model.db.documents:
-            self.ui.tbl1.setItem(_str, 0, QTableWidgetItem(str(doc.get_num_str())))
-            self.ui.tbl1.setItem(_str, 1, QTableWidgetItem(str(doc.get_date_str())))
-            self.ui.tbl1.setItem(_str, 2, QTableWidgetItem(doc.get_date_sending_str()))
-            self.ui.tbl1.setItem(_str, 3, QTableWidgetItem(doc.type))
+            if doc.status != "На исполнение":
+                self._tbl_blink = False
+
+            self.ui.tbl1.setItem(_str, 0, self._get_tbl_item(doc.get_num_str()))
+            self.ui.tbl1.setItem(_str, 1, self._get_tbl_item(doc.get_date_str()))
+            self.ui.tbl1.setItem(_str, 2, self._get_tbl_item(doc.get_date_sending_str()))
+            self.ui.tbl1.setItem(_str, 3, self._get_tbl_item(doc.type))
             if doc.team_number > 0:
-                self.ui.tbl1.setItem(_str, 4, QTableWidgetItem(str(doc.team_number)))
+                self.ui.tbl1.setItem(_str, 4, self._get_tbl_item(doc.team_number))
             else:
-                self.ui.tbl1.setItem(_str, 4, QTableWidgetItem(""))
-            self.ui.tbl1.setItem(_str, 5, QTableWidgetItem(doc.team_leader))
-            self.ui.tbl1.setItem(_str, 6, QTableWidgetItem(doc.get_execute_to_str()))
-            self.ui.tbl1.setItem(_str, 7, QTableWidgetItem(doc.get_start_time_str()))
-            self.ui.tbl1.setItem(_str, 8, QTableWidgetItem(doc.get_end_time_str()))
-            self.ui.tbl1.setItem(_str, 9, QTableWidgetItem(doc.status))
-            self.ui.tbl1.setItem(_str, 10, QTableWidgetItem(doc.destination))
-            self.ui.tbl1.setItem(_str, 11, QTableWidgetItem(doc.autos_number))
+                self.ui.tbl1.setItem(_str, 4, self._get_tbl_item(""))
+            self.ui.tbl1.setItem(_str, 5, self._get_tbl_item(doc.team_leader))
+            self.ui.tbl1.setItem(_str, 6, self._get_tbl_item(doc.get_execute_to_str()))
+            self.ui.tbl1.setItem(_str, 7, self._get_tbl_item(doc.get_start_time_str()))
+            self.ui.tbl1.setItem(_str, 8, self._get_tbl_item(doc.get_end_time_str()))
+            self.ui.tbl1.setItem(_str, 9, self._get_tbl_item(doc.status))
+            self.ui.tbl1.setItem(_str, 10, self._get_tbl_item(doc.destination))
+            self.ui.tbl1.setItem(_str, 11, self._get_tbl_item(doc.autos_number))
             btn = QPushButton(parent=self.ui.tbl1)
             btn.setText('Открыть')
             btn.clicked.connect(self._click_get_doc_btn)
@@ -292,6 +303,7 @@ class MainWindow(QMainWindow):
                 self.ui.tbl1.item(_str, _col).setTextAlignment(QtCore.Qt.AlignCenter | QtCore.Qt.AlignCenter)
             _str += 1
 
+        self._tbl_blink = not self._tbl_blink
         # делаем ресайз колонок по содержимому
         sleep(0.01)
         # self.ui.tbl1.resizeColumnsToContents()
