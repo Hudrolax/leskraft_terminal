@@ -226,7 +226,10 @@ class MainWindow(QMainWindow):
             sys.exit(self)
 
         qss_file = QTextStream(file)
-        self.setStyleSheet(qss_file.readAll())
+        _txt = qss_file.readAll()
+        self.setStyleSheet(_txt)
+        self.ui.teamslist_btn.setStyleSheet(_txt)
+        self.ui.create_team_btn.setStyleSheet(_txt)
         file.close()
 
     def closeEvent(self, event):

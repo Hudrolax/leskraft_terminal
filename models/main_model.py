@@ -58,16 +58,16 @@ class MainModel(Threaded_class, LoggerSuper):
     def get_http_data_static(route, parameters=''):
         try:
             answer = requests.get(f'http://{SERVER}/{BASE_NAME}{route}?api_key={API_KEY}{parameters}',
-                                   auth=(USER, PASSWORD))
+                                   auth=(USER, PASSWORD), timeout=3)
             if answer.status_code == 200:
                 return answer.content
             else:
                 MainModel.logger.error(f'http_get {route} status code {answer.status_code}:{answer.content.decode()}')
                 return None
-        except Exception as e:
+        except Exception as ex:
             try:
                 answer =  requests.get(f'http://{SERVER2}/{BASE_NAME}{route}?api_key={API_KEY}{parameters}',
-                                       auth=(USER, PASSWORD))
+                                       auth=(USER, PASSWORD), timeout=3)
                 if answer.status_code == 200:
                     return answer.content
                 else:
@@ -82,8 +82,7 @@ class MainModel(Threaded_class, LoggerSuper):
             if content is not None:
                 content = content.decode()
             else:
-                self.logger.error('content is None')
-                return
+                raise Exception('exaption content is None')
 
             decoded_json = json.loads(content)
             self.logger.debug(f'Get JSON: {decoded_json}')
@@ -91,7 +90,7 @@ class MainModel(Threaded_class, LoggerSuper):
             self._online = True
         except Exception as e:
             self._online = False
-            self.logger.critical(e)
+            self.logger.error(e)
             sleep(5)
 
     def _get_docs(self, decoded_json):
