@@ -272,6 +272,7 @@ class MainWindow(QMainWindow):
     def fill_table(self):
         if not self.ui.init_GUI:
             return
+        self.ui.tbl1.setRowCount(1)
         self.ui.tbl1.setRowCount(len(self.model.db.documents) + 1)
         _str = 1
         for doc in self.model.db.documents:
