@@ -26,6 +26,6 @@ class WatchDog(LoggerSuper, Threaded_class, COM_port):
                 self.logger.warning(f'Write error to port {_s_port}')
 
     def _ping(self):
-        while self.working():
+        while self.working:
             self._send_to_serial(self.serial, '~U')  # Отправка команды "я в норме" на вотчдог
             sleep(3)
