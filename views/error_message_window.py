@@ -4,7 +4,7 @@ from PyQt5.QtGui import QFont, QColor
 
 class Error_window(QDialog):
     HEIGHT = 400
-    WIDTH = 600
+    WIDTH = 800
     def __init__(self, main_window, error, exit=False):
         super().__init__()
         self.main_window = main_window

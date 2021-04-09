@@ -244,5 +244,8 @@ class DocumentWindow(QDialog):
         result = self.controller.stop_work_with_document()
 
     def _print_document(self):
+        self.ui.printButton.setEnabled(False)
+        self.ui.printButton.setStyleSheet('background-color: #87939A;') # grey btn
+
         self._show_status_message('Идет печать...')
         self.controller.click_print_btn()

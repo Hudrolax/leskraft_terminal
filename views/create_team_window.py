@@ -54,6 +54,8 @@ class CreateTeamWindow(QDialog):
         self.showNormal()
         if not TEST_MODE:
             self.setCursor(Qt.BlankCursor)
+            self.ui.lineEdit.setVisible(False)
+            self.ui.pushButton.setVisible(False)
         self.fill_table_header()
         self.center_on_screen()
 
