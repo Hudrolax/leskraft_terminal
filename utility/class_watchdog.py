@@ -2,25 +2,28 @@ from utility.com_ports import COM_port
 import threading
 from time import sleep
 from utility.logger_super import LoggerSuper
-from utility.base_class import BaseClass
+from utility.threaded_class import Threaded_class
 import logging
 
 
-class WatchDog(LoggerSuper, BaseClass, COM_port):
-    logger = logging.getLogger('CWatchDog')
+class WatchDog(LoggerSuper, Threaded_class, COM_port):
+    logger = logging.getLogger('WatchDog')
 
     def __init__(self, PID):
         super().__init__('WatchDog', PID, 9600, 1)
 
-        self._watchdog_thread = threading.Thread(target=self._ping, args=(), daemon=True)
-        self._watchdog_thread.start()
+        if self.initialized:
+            self._watchdog_thread = threading.Thread(target=self._ping, args=(), daemon=True)
+            self._watchdog_thread.start()
+        else:
+            self.logger.info('Вотчдог не инициализирован. Работаем без него...')
 
-    @classmethod
-    def _send_to_serial(cls, _s_port, s):
-        try:
-            _s_port.write(bytes(s, 'utf-8'))
-        except:
-            cls.logger.warning(f'Write error to port {_s_port}')
+    def _send_to_serial(self, _s_port, s):
+        if self.initialized:
+            try:
+                _s_port.write(bytes(s, 'utf-8'))
+            except:
+                self.logger.warning(f'Write error to port {_s_port}')
 
     def _ping(self):
         while self.working():

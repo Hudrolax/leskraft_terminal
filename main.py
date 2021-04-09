@@ -3,7 +3,8 @@ from PyQt5.QtWidgets import QApplication
 from utility.logger_super import LoggerSuper
 from models.main_model import MainModel
 from controllers.main_controller import MainController
-from env import PRINTER_NAME, AUTH_BASIC, API_KEY, WRITE_LOG_TO_FILE, LOG_LEVEL
+from env import PRINTER_NAME, AUTH_BASIC, API_KEY, WRITE_LOG_TO_FILE, LOG_LEVEL, WATCHDOG_PID
+from utility.class_watchdog import WatchDog
 import logging
 from datetime import datetime
 
@@ -51,6 +52,7 @@ if __name__ == '__main__':
         print('В env.py не задан API_KEY')
     else:
         try:
+            watchdog = WatchDog(WATCHDOG_PID)
             main_app = Main()
             sys.exit(main_app.run())
         except Exception as ex:
