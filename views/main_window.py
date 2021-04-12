@@ -262,11 +262,10 @@ class MainWindow(QMainWindow):
         self.ui.set_table_header_style()
         self.ui.tbl1.update()
 
-    def _get_tbl_item(self, val):
-        _blink_color = QtGui.QColor(255, 0, 0, 127) # light red
+    def _get_tbl_item(self, val, color=None):
         _item = QTableWidgetItem(str(val))
-        if self._tbl_blink:
-            _item.setBackground(_blink_color)
+        if color is not None:
+            _item.setBackground(color)
         return _item
 
     def fill_table(self):
@@ -277,24 +276,32 @@ class MainWindow(QMainWindow):
         _str = 1
         for doc in self.model.db.documents:
             _blnk = self._tbl_blink
-            if doc.status != "На исполнение":
+            _color = None
+            if doc.status == "На исполнение":
+                if self._tbl_blink:
+                    _color = QtGui.QColor(255, 0, 0, 127)  # light red
+            elif doc.status == "В работе":
                 self._tbl_blink = False
+                _color = QtGui.QColor(255, 251, 125) # light yellow
+            elif doc.status == "Выполнено":
+                self._tbl_blink = False
+                _color = QtGui.QColor(0, 255, 0, 127) # light green
 
-            self.ui.tbl1.setItem(_str, 0, self._get_tbl_item(doc.get_num_str()))
-            self.ui.tbl1.setItem(_str, 1, self._get_tbl_item(doc.get_date_str()))
-            self.ui.tbl1.setItem(_str, 2, self._get_tbl_item(doc.get_date_sending_str()))
-            self.ui.tbl1.setItem(_str, 3, self._get_tbl_item(doc.type))
+            self.ui.tbl1.setItem(_str, 0, self._get_tbl_item(doc.get_num_str(), _color))
+            self.ui.tbl1.setItem(_str, 1, self._get_tbl_item(doc.get_date_str(), _color))
+            self.ui.tbl1.setItem(_str, 2, self._get_tbl_item(doc.get_date_sending_str(), _color))
+            self.ui.tbl1.setItem(_str, 3, self._get_tbl_item(doc.type, _color))
             if doc.team_number > 0:
-                self.ui.tbl1.setItem(_str, 4, self._get_tbl_item(doc.team_number))
+                self.ui.tbl1.setItem(_str, 4, self._get_tbl_item(doc.team_number, _color))
             else:
-                self.ui.tbl1.setItem(_str, 4, self._get_tbl_item(""))
-            self.ui.tbl1.setItem(_str, 5, self._get_tbl_item(doc.team_leader))
-            self.ui.tbl1.setItem(_str, 6, self._get_tbl_item(doc.get_execute_to_str()))
-            self.ui.tbl1.setItem(_str, 7, self._get_tbl_item(doc.get_start_time_str()))
-            self.ui.tbl1.setItem(_str, 8, self._get_tbl_item(doc.get_end_time_str()))
-            self.ui.tbl1.setItem(_str, 9, self._get_tbl_item(doc.status))
-            self.ui.tbl1.setItem(_str, 10, self._get_tbl_item(doc.destination))
-            self.ui.tbl1.setItem(_str, 11, self._get_tbl_item(doc.autos_number))
+                self.ui.tbl1.setItem(_str, 4, self._get_tbl_item("", _color))
+            self.ui.tbl1.setItem(_str, 5, self._get_tbl_item(doc.team_leader, _color))
+            self.ui.tbl1.setItem(_str, 6, self._get_tbl_item(doc.get_execute_to_str(), _color))
+            self.ui.tbl1.setItem(_str, 7, self._get_tbl_item(doc.get_start_time_str(), _color))
+            self.ui.tbl1.setItem(_str, 8, self._get_tbl_item(doc.get_end_time_str(), _color))
+            self.ui.tbl1.setItem(_str, 9, self._get_tbl_item(doc.status, _color))
+            self.ui.tbl1.setItem(_str, 10, self._get_tbl_item(doc.destination, _color))
+            self.ui.tbl1.setItem(_str, 11, self._get_tbl_item(doc.autos_number, _color))
             btn = QPushButton(parent=self.ui.tbl1)
             btn.setText('Открыть')
             btn.clicked.connect(self._click_get_doc_btn)
