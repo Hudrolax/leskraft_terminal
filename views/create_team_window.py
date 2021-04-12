@@ -17,7 +17,7 @@ class GUI_Login_Window(Ui_Login, LoggerSuper):
         self.tbl.setStyleSheet("font: 12pt \"Consolas\";")
         self.tbl.setSortingEnabled(False)
 
-        width = 800
+        width = 850
         hight = 480
         window.setMinimumSize(width, hight)
         window.setMaximumSize(width, hight)
