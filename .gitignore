@@ -140,3 +140,4 @@ dmypy.json
 *.avi
 *.stl
 log_*.txt
+*.sh
