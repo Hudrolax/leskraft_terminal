@@ -8,6 +8,7 @@ if __name__ != '__main__':
     from env import *
 import logging
 import requests
+from time import sleep
 
 
 def _get_http_data_static(route, parameters=''):
@@ -50,6 +51,7 @@ def print_file(path):
             conn.printFile(PRINTER_NAME, path, "", {})
         else:
             win32_print(path)
+        sleep(3000)
         os.remove(path)
         return ''
     else:
