@@ -5,7 +5,6 @@ from PyQt5.QtCore import Qt, pyqtSlot
 from PyQt5.QtWidgets import QDialog, QApplication, QTableWidgetItem, QAbstractItemView
 from PyQt5 import QtCore
 from utility.logger_super import LoggerSuper
-from time import sleep
 from utility.qt5_timer import TimerHandler
 from utility.qt5_windows import center_on_screen
 from datetime import datetime
@@ -229,7 +228,7 @@ class DocumentWindow(QDialog):
             _str += 1
 
         # делаем ресайз колонок по содержимому
-        sleep(0.01)
+        QtCore.QThread.msleep(100)
         self.ui.doc_tbl.resizeColumnsToContents()
         self.ui.doc_tbl.update()
 

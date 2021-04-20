@@ -5,7 +5,6 @@ from PyQt5.QtWidgets import QApplication, QDialog, QTableWidgetItem, QPushButton
 from PyQt5 import QtCore
 from utility.logger_super import LoggerSuper
 import logging
-from time import sleep
 from config import TEST_MODE
 
 
@@ -136,7 +135,7 @@ class CreateTeamWindow(QDialog):
             self.ui.label_6.setStyleSheet("color: red")
             self.ui.state_label.setText(_text)
             self.ui.state_label.setStyleSheet("color: red")
-        sleep(3)
+        QtCore.QThread.msleep(3000)
         self.controller.close()
 
     def center_on_screen(self):
@@ -151,7 +150,7 @@ class CreateTeamWindow(QDialog):
         self.ui.tbl.setItem(0, 1, QTableWidgetItem('Имя'))
         self.ui.tbl.setItem(0, 2, QTableWidgetItem('Карта'))
         self.ui.tbl.setItem(0, 3, QTableWidgetItem('Роль'))
-        sleep(0.01)
+        QtCore.QThread.msleep(100)
         self.ui.tbl.resizeColumnsToContents()
         self.ui.tbl.update()
 
@@ -188,7 +187,7 @@ class CreateTeamWindow(QDialog):
                     Потому заполнение таблицы сделано в отдельном потоке"""
                 self.ui.tbl.setCellWidget(emp[0]+2, 4, btn)
 
-        sleep(0.01)
+        QtCore.QThread.msleep(100)
         self.ui.tbl.resizeColumnsToContents()
         self.ui.tbl.update()
 

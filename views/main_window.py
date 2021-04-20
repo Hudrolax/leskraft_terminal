@@ -8,7 +8,6 @@ from PyQt5.QtCore import QFile, QTextStream, Qt
 import logging
 from utility.logger_super import LoggerSuper
 import sys
-from time import sleep
 from datetime import datetime
 from env import FULLSCREEN,PRINTER_NAME,RFID_SCANNER_PID,BAR_SCANNER_PID
 from utility.qt5_timer import TimerHandler
@@ -318,7 +317,7 @@ class MainWindow(QMainWindow):
 
         self._tbl_blink = not self._tbl_blink
         # делаем ресайз колонок по содержимому
-        sleep(0.01)
+        QtCore.QThread.msleep(100)
         # self.ui.tbl1.resizeColumnsToContents()
         self.ui.tbl1.update()
 

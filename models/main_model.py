@@ -1,5 +1,4 @@
 import requests
-from time import sleep
 import json
 from utility.logger_super import LoggerSuper
 from models.data_base import DB
@@ -10,6 +9,7 @@ from views.error_message_window import Error_window
 from views.main_window import MainWindow
 from config import *
 import threading
+from PyQt5 import QtCore
 
 
 class MainModel(Threaded_class, LoggerSuper):
@@ -30,7 +30,8 @@ class MainModel(Threaded_class, LoggerSuper):
         if AUTO_UPDATE:
             self._update = True
             while self._update:
-                sleep(0.1)
+                QtCore.QThread.msleep(100)
+
             return True
         else:
             return False
@@ -47,7 +48,7 @@ class MainModel(Threaded_class, LoggerSuper):
     def interrupted_sleep(self, pause):
         for k in range(10, pause*10):
             if self.working and not self._update:
-                sleep(0.1)
+                QtCore.QThread.msleep(100)
             elif self._update:
                 self._update = False
                 return
@@ -91,7 +92,7 @@ class MainModel(Threaded_class, LoggerSuper):
         except Exception as e:
             self._online = False
             self.logger.error(e)
-            sleep(5)
+            QtCore.QThread.msleep(3000)
 
     def _get_docs(self, decoded_json):
         json_docs = decoded_json.get('docs')
@@ -179,7 +180,7 @@ class MainModel(Threaded_class, LoggerSuper):
     def show_error_message(self, message, exit):
         for observer in self._observers:
             if isinstance(observer, MainWindow):
-                sleep(1)
+                QtCore.QThread.msleep(1000)
                 Error_window(observer, message, exit)
                 return
 
