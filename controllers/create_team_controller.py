@@ -32,4 +32,3 @@ class CreateTeam_controller(LoggerSuper):
         # отключим сканеры от формы и подключим их обратно к основной форме
         self.window.main_window.controller.connect_scanners_to_main_form()
         self.window.main_window.controller.create_team_window = None
-        del self.window

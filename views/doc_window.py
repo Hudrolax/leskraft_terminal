@@ -1,14 +1,11 @@
 from views.ui.doc_form_ui import Ui_doc_form
-from views.error_message_window import Error_window
 from PyQt5.QtGui import QFont
 from PyQt5.QtCore import Qt, pyqtSlot
 from PyQt5.QtWidgets import QDialog, QApplication, QTableWidgetItem, QAbstractItemView
 from PyQt5 import QtCore
 from utility.logger_super import LoggerSuper
 from utility.qt5_windows import center_on_screen
-from datetime import datetime
 import logging
-from views.choice_team_window import ChoiceTeamWindow
 from config import TEST_MODE
 from controllers.doc_form_controller import DocForm_controller
 from models.doc_window_model import DocumentForm_model
@@ -53,83 +50,20 @@ class DocumentWindow(QDialog):
         self.ui.setupUi(self)
         self.ui.custom_setup(self)
         self.ui.close_button.clicked.connect(self.controller.close_window)
-        self.ui.printButton.clicked.connect(self._print_document)
+        self.ui.printButton.clicked.connect(self.controller.click_print_btn)
 
         self.showNormal()
         if not TEST_MODE:
             self.setCursor(Qt.BlankCursor)
         center_on_screen(self)
 
-        self.choice_team_window = None # Окно выбора команды
-        self.choosed_team = None # Выбранная команда
-
-        self._update_status = True
-        self._update_status_time = datetime.now()
-
         self.fill_header()
         self.fill_table_header()
         self.fill_table()
 
-    def _open_choice_team_window(self, teams):
-        self.choice_team_window = ChoiceTeamWindow(self, teams)
-
     def _show_status_message(self, message, color='#960E10', font_size='24'):
-
         self.ui.status_bar.setText(message)
         self.ui.status_bar.setStyleSheet(f'color: {color}; font: bold {font_size}pt \"Consolas\"')
-        return
-
-    def _threaded_get_RFID_code(self):
-        if self.controller.getted_RFID_code != '':
-            _code = self.controller.getted_RFID_code
-            self.controller.getted_RFID_code = ''
-
-            if self.model.doc().team_number > 0:
-                return
-
-            _teams = self.model.db.get_team_by_emloyee_code(_code)
-            if len(_teams) > 0:
-                if len(_teams) > 1:
-                    self._open_choice_team_window(_teams)
-                    if self.choosed_team is not None:
-                        self.model.team = self.choosed_team
-                        self.choosed_team = None
-                        self.choice_team_window = None
-                else:
-                    self.model.team = _teams[0]
-            else:
-                self._show_status_message(f'Не найдена бригада с сотрудником с номером карты {_code}')
-
-    def _threaded_get_bar_code(self):
-        if self.controller.getted_bar_code != '':
-            _code = self.controller.getted_bar_code
-            self.controller.getted_bar_code = ''
-            if self.model.team is None and self.model.doc().team_number == 0:
-                self._show_status_message('Сначала отсканируйте карту сотрудника для начала работы!!!')
-                return
-
-            doc = self.model.db.get_doc(_code)
-            if doc is not None:
-                if doc.link == self.model.doc_link:
-                    if self.model.doc().status == 'На исполнение':
-                        result = self.controller.start_work_with_document()
-                    elif self.model.doc().status == 'В работе':
-                        result = self.controller.stop_work_with_document()
-                    elif self.model.doc().status == 'Выполнено':
-                        self._show_status_message('Задание уже выполнено')
-                        return
-                    else:
-                        result = 'Неизвестная ошибка'
-
-                    if result:
-                        self.controller.close_window()
-                    else:
-                        Error_window(self, result)
-                else:
-                    self._show_status_message('Вы осканировали не тот документ!')
-                    return
-            else:
-                self._show_status_message(f'Не найден документ с кодом {_code}')
 
     def fill_header(self):
         doc = self.model.doc()
@@ -167,17 +101,15 @@ class DocumentWindow(QDialog):
             self.ui.start_time.setStyleSheet('color: #FF0000')
 
         # status bar
-        if self._update_status:
-            if doc.team_number == 0 and self.model.team is None:
-                self.ui.status_bar.setText('Отсканируйте карту сотрудника для начала работы')
-                self.ui.status_bar.setStyleSheet('color: #960E10; font: bold 24pt \"Consolas\"')
-            elif doc.get_start_time_str() == '':
-                self.ui.status_bar.setText('Отсканируйте документ для начала работы')
-                self.ui.status_bar.setStyleSheet('color: #00FF00; font: bold 24pt \"Consolas\"')
-            elif doc.status == 'В работе':
-                self.ui.status_bar.setText('Отсканируйте документ для окончания работы')
-                self.ui.status_bar.setStyleSheet('color: #960E10; font: bold 24pt \"Consolas\"')
-
+        if doc.team_number == 0 and self.model.team is None:
+            self.ui.status_bar.setText('Отсканируйте карту сотрудника для начала работы')
+            self.ui.status_bar.setStyleSheet('color: #960E10; font: bold 24pt \"Consolas\"')
+        elif doc.get_start_time_str() == '':
+            self.ui.status_bar.setText('Отсканируйте документ для начала работы')
+            self.ui.status_bar.setStyleSheet('color: #00FF00; font: bold 24pt \"Consolas\"')
+        elif doc.status == 'В работе':
+            self.ui.status_bar.setText('Отсканируйте документ для окончания работы')
+            self.ui.status_bar.setStyleSheet('color: #960E10; font: bold 24pt \"Consolas\"')
 
     def fill_table_header(self):
         self.ui.doc_tbl.setItem(0, 1, QTableWidgetItem('Код'))
@@ -201,27 +133,11 @@ class DocumentWindow(QDialog):
             self.ui.doc_tbl.setItem(_str, 4, QTableWidgetItem(string.status))
             self.ui.doc_tbl.setItem(_str, 5, QTableWidgetItem(string.adress_shelf))
             self.ui.doc_tbl.setItem(_str, 6, QTableWidgetItem(string.adress_floor))
-
             _str += 1
-
         # делаем ресайз колонок по содержимому
         QtCore.QThread.msleep(100)
         self.ui.doc_tbl.resizeColumnsToContents()
-        self.ui.doc_tbl.update()
 
-    @pyqtSlot(bool)
-    def _start_work_with_doc(self):
-        result = self.controller.start_work_with_document()
-        if result:
-            self.close()
-
-    @pyqtSlot(bool)
-    def _stop_work_with_doc(self):
-        result = self.controller.stop_work_with_document()
-
-    def _print_document(self):
+    def disable_print_btn(self):
         self.ui.printButton.setEnabled(False)
         self.ui.printButton.setStyleSheet('background-color: #87939A;') # grey btn
-
-        self._show_status_message('Идет печать...')
-        self.controller.click_print_btn()

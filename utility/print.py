@@ -8,6 +8,7 @@ if __name__ != '__main__':
     from env import *
 import logging
 import requests
+from time import sleep
 from PyQt5 import QtCore
 
 
@@ -38,11 +39,9 @@ def get_pdf_and_print(link):
     try:
         with open(file_path, 'wb') as f:
             f.write(content)
-        return print_file(file_path)
+        print_file(file_path)
     except:
-        error_msg = f'Ошибка записи файла {file_path}'
-        logging.critical(error_msg)
-        return error_msg
+        logging.critical(f'Ошибка записи файла {file_path}')
 
 def print_file(path):
     if os.path.exists(path):
@@ -51,11 +50,12 @@ def print_file(path):
             conn.printFile(PRINTER_NAME, path, "", {})
         else:
             win32_print(path)
-        QtCore.QThread.msleep(1000)
+        # sleep(3)
+        QtCore.QThread.msleep(3000)
         os.remove(path)
-        return ''
+        logging.info(f'Файл {path} отправлен на печать и удален.')
     else:
-        return f'Не найден файл для печати {path}'
+        logging.error(f'Не найден файл для печати {path}')
 
 def find_printer_by_name(name):
     try:

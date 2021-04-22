@@ -92,6 +92,7 @@ class MainWindow(QMainWindow):
         self.ui.exit_btn.clicked.connect(self.controller.click_exit_btn)
         self.ui.create_team_btn.clicked.connect(self.controller.click_create_team_btn)
         self.ui.teamslist_btn.clicked.connect(self.controller.click_teamslist_btn)
+        self.ui.rebootButton.clicked.connect(self.controller.click_reboot_btn)
 
         # обновления ТЧ по таймеру
         self.update_tbl_timer = QtCore.QTimer()

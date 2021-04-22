@@ -56,7 +56,6 @@ class TeamListWindow(QDialog):
         self.close()
         # отключим сканеры от формы и подключим их обратно к основной форме
         self.main_window.controller.connect_scanners_to_main_form()
-        del self
 
     def center_on_screen(self):
         resolution = QApplication.desktop().availableGeometry()

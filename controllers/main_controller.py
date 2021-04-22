@@ -3,7 +3,7 @@ from views.team_list_window import TeamListWindow
 from views.doc_window import DocumentWindow
 
 from utility.com_ports import COM_port
-from env import RFID_SCANNER_PID, BAR_SCANNER_PID
+from env import RFID_SCANNER_PID, BAR_SCANNER_PID, WATCHDOG_PID
 from utility.reboot import reboot
 from PyQt5 import QtCore
 from utility.logger_super import LoggerSuper
@@ -16,6 +16,12 @@ class MainController:
         self.create_team_window = None
         self.team_list_window = None
         self.doc_window = None
+        # поток работы с Watchdog
+        self.watchdog_thread = QtCore.QThread()
+        self.watchdog_handler = Watchdog_Handler()
+        self.watchdog_handler.moveToThread(self.watchdog_thread)
+        self.watchdog_thread.started.connect(self.watchdog_handler.run)
+        self.watchdog_thread.start()
         # поток работы с QR
         self.QR_thread = QtCore.QThread()
         self.QR_handler = QR_CodeScanner_Handler()
@@ -87,7 +93,7 @@ class QR_CodeScanner_Handler(QtCore.QObject, COM_port, LoggerSuper):
     logger = logging.getLogger('QR_CodeScanner_Handler')
 
     def __init__(self):
-        super().__init__(name='QRScanner', PID=BAR_SCANNER_PID, speed=9600, timeout=500)
+        super().__init__(name='QRScanner', PID=BAR_SCANNER_PID, speed=9600, timeout=1)
 
     def run(self):
         while True:
@@ -113,7 +119,7 @@ class RFIF_Scanner_Handler(QtCore.QObject, COM_port, LoggerSuper):
     get_RFID_code_signal = QtCore.pyqtSignal(str)
     logger = logging.getLogger('RFIF_Scanner_Handler')
     def __init__(self):
-        super().__init__(name='RFIDScanner', PID=RFID_SCANNER_PID, speed=9600, timeout=500)
+        super().__init__(name='RFIDScanner', PID=RFID_SCANNER_PID, speed=9600, timeout=1)
         self.id = '00'
 
     # метод, который будет выполнять алгоритм в другом потоке
@@ -146,3 +152,25 @@ class RFIF_Scanner_Handler(QtCore.QObject, COM_port, LoggerSuper):
                 buffer = b''
                 QtCore.QThread.msleep(1000)
                 self.inicialize_com_port()
+
+# класс для работы с вотчдогом в отдельном потоке
+class Watchdog_Handler(QtCore.QObject, COM_port, LoggerSuper):
+    logger = logging.getLogger('Watchdog_Handler')
+    def __init__(self):
+        super().__init__(name='Watchdog', PID=WATCHDOG_PID, speed=9600, timeout=1)
+
+    def run(self):
+        QtCore.QThread.msleep(3000)
+        if not self.initialized:
+            self.logger.info('Вотчдог не инициализирован. Работаем без него...')
+            return
+
+        while True:
+            if self.initialized:
+                try:
+                    self.serial.write(bytes('~U', 'utf-8'))
+                except:
+                    self.logger.warning(f'Write error to port {self.serial}')
+            else:
+                return
+            QtCore.QThread.msleep(3000)

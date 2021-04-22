@@ -15,15 +15,8 @@ class DocumentForm_model(LoggerSuper):
     def doc(self):
         return self.db.get_doc(self.doc_link)
 
-    def start_work_with_document(self):
-        self.logger.info(f'начало работы с документом {self.doc()}')
-        return self._get_task()
-
-    def stop_work_with_document(self):
+    def finish_task(self):
         self.logger.info(f'конец работы с документом {self.doc()}')
-        return self._finish_task()
-
-    def _finish_task(self):
         try:
             url = f'http://{SERVER}/{BASE_NAME}{FINISH_TASK_ROUTE}'
             headers = {'Content-type': 'application/json',  # Определение типа данных
@@ -34,16 +27,18 @@ class DocumentForm_model(LoggerSuper):
             answer = requests.post(url=url, json=body, headers=headers, timeout=CONNECTION_TIMEOUT).content.decode()
             if answer != 'ok':
                 self.logger.error(answer)
-            return answer
+                return False
+            return True
         except (
                 requests.exceptions.ConnectionError or requests.exceptions.ConnectTimeout or requests.exceptions.BaseHTTPError) as e:
             self.logger.critical(e)
-            return str(e)
+            return False
         except Exception as e:
             self.logger.critical(e)
-            return str(e)
+            return False
 
-    def _get_task(self):
+    def get_task(self):
+        self.logger.info(f'начало работы с документом {self.doc()}')
         try:
             url = f'http://{SERVER}/{BASE_NAME}{GET_TASK_ROUTE}'
             headers = {'Content-type': 'application/json',  # Определение типа данных
@@ -53,10 +48,11 @@ class DocumentForm_model(LoggerSuper):
             answer = requests.post(url=url, json=body, headers=headers, timeout=CONNECTION_TIMEOUT).content.decode()
             if answer != 'ok':
                 self.logger.error(answer)
-            return answer
+                return False
+            return True
         except (requests.exceptions.ConnectionError or requests.exceptions.ConnectTimeout or requests.exceptions.BaseHTTPError) as e:
             self.logger.critical(e)
-            return str(e)
+            return False
         except Exception as e:
             self.logger.critical(e)
-            return str(e)
+            return False

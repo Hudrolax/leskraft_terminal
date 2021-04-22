@@ -16,7 +16,7 @@ class GUI_choice_team(Ui_choice_team_form, LoggerSuper):
 
 class ChoiceTeamWindow(QDialog):
     logger = logging.getLogger('Choice_team_form')
-    def __init__(self, parent, teams):
+    def __init__(self, teams, parent):
         super(QDialog, self).__init__(parent)
         self.teams = teams
         self.parent = parent
@@ -39,12 +39,6 @@ class ChoiceTeamWindow(QDialog):
         self._fill_table_header()
         self.fill_table()
         self.exec_()
-
-    def set_table_header_style(self):
-        pass
-        # for col in range(0, self.ui.tbl.columnCount()-1):
-        #     self.ui.tbl.item(0, col).setFont(QFont("Consolas", 14, QFont.Bold))
-        #     self.ui.tbl.item(0, col).setTextAlignment(Qt.AlignCenter | Qt.AlignCenter)
 
     def _fill_table_header(self):
         self.ui.tbl.setItem(0, 0, QTableWidgetItem('№'))
@@ -77,12 +71,11 @@ class ChoiceTeamWindow(QDialog):
             btn.team = team
             self.ui.tbl.setCellWidget(_str, 3, btn)
             self.ui.tbl.setRowHeight(_str, 80)
-
             _str += 1
 
         sleep(0.01)
         self.ui.tbl.update()
 
     def _click_return_btn(self):
-        self.parent.choosed_team = self.sender().team
+        self.parent.controller.choosed_team = self.sender().team
         self.close()
