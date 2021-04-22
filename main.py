@@ -1,9 +1,11 @@
 import sys
+from sys import platform
 from PyQt5.QtWidgets import QApplication
 from views.main_window import MainWindow
-from env import WRITE_LOG_TO_FILE, LOG_LEVEL, WATCHDOG_PID
+from env import WRITE_LOG_TO_FILE, LOG_LEVEL
 import logging
 from datetime import datetime
+import os
 
 
 if __name__ == '__main__':
@@ -29,7 +31,13 @@ if __name__ == '__main__':
     else:
         logging.basicConfig(format=LOG_FORMAT, level=LOG_LEVEL, datefmt='%d/%m/%y %H:%M:%S')
 
-    # watchdog = WatchDog(WATCHDOG_PID)
+    if platform == "linux" or platform == "linux2" or platform == "darwin":
+        _path = os.path.abspath(__file__)
+        os.system(f'find {_path}' + ' -type f -name "log_*" -mtime +168 -exec rm -rf {} \;')
+        logger.info('Удалим логи старше недели')
+    else:
+        logger.info('Не могу удалить логи, если мы не в unix')
+
     app = QApplication(sys.argv)
     window = MainWindow()
     window.show()
