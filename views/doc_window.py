@@ -5,12 +5,13 @@ from PyQt5.QtCore import Qt, pyqtSlot
 from PyQt5.QtWidgets import QDialog, QApplication, QTableWidgetItem, QAbstractItemView
 from PyQt5 import QtCore
 from utility.logger_super import LoggerSuper
-from utility.qt5_timer import TimerHandler
 from utility.qt5_windows import center_on_screen
 from datetime import datetime
 import logging
 from views.choice_team_window import ChoiceTeamWindow
 from config import TEST_MODE
+from controllers.doc_form_controller import DocForm_controller
+from models.doc_window_model import DocumentForm_model
 
 
 class GUI_Doc_Window(Ui_doc_form, LoggerSuper):
@@ -30,7 +31,6 @@ class GUI_Doc_Window(Ui_doc_form, LoggerSuper):
 
         resolution = QApplication.desktop().availableGeometry()
         window.resize(round(resolution.width()*0.9), round(resolution.height()*0.9))
-        self.init_GUI = True
 
     def set_table_header_style(self):
         self.doc_tbl.item(0, 0).setFont(QFont("Consolas", 18, QFont.Bold))
@@ -40,11 +40,11 @@ class GUI_Doc_Window(Ui_doc_form, LoggerSuper):
 
 class DocumentWindow(QDialog):
     logger = logging.getLogger('Document_Form')
-    def __init__(self, controller, model, parent = None):
+    def __init__(self, db, doc_link, parent = None):
         super(QDialog, self).__init__(parent)
-        self.controller = controller
-        self.model = model
-        self.parent = parent
+        self.main_window = parent
+        self.controller = DocForm_controller(self)
+        self.model = DocumentForm_model(db, doc_link, self)
 
         # подключаем визуальное представление
         self.setWindowFlags(Qt.Window | Qt.CustomizeWindowHint)
@@ -63,32 +63,18 @@ class DocumentWindow(QDialog):
         self.choice_team_window = None # Окно выбора команды
         self.choosed_team = None # Выбранная команда
 
-        # создадим поток по таймеру
-        self.clock_timer_thread = QtCore.QThread()
-        self.clock_timer_handler = TimerHandler(500)
-        self.clock_timer_handler.moveToThread(self.clock_timer_thread)
-        self.clock_timer_handler.timer_signal.connect(self._timer)
-        self.clock_timer_thread.started.connect(self.clock_timer_handler.run)
-        self.clock_timer_thread.start()
         self._update_status = True
         self._update_status_time = datetime.now()
+
+        self.fill_header()
+        self.fill_table_header()
+        self.fill_table()
 
     def _open_choice_team_window(self, teams):
         self.choice_team_window = ChoiceTeamWindow(self, teams)
 
-    @QtCore.pyqtSlot()
-    def _timer(self):
-        self._threaded_get_RFID_code()
-        self._threaded_get_bar_code()
-        self.fill_header()
-        self.fill_table_header()
-        self.fill_table()
-        if (datetime.now()-self._update_status_time).total_seconds() > 3:
-            self._update_status = True
-
     def _show_status_message(self, message, color='#960E10', font_size='24'):
-        self._update_status = False
-        self._update_status_time = datetime.now()
+
         self.ui.status_bar.setText(message)
         self.ui.status_bar.setStyleSheet(f'color: {color}; font: bold {font_size}pt \"Consolas\"')
         return
@@ -125,7 +111,6 @@ class DocumentWindow(QDialog):
             doc = self.model.db.get_doc(_code)
             if doc is not None:
                 if doc.link == self.model.doc_link:
-                    result = ''
                     if self.model.doc().status == 'На исполнение':
                         result = self.controller.start_work_with_document()
                     elif self.model.doc().status == 'В работе':
@@ -147,8 +132,6 @@ class DocumentWindow(QDialog):
                 self._show_status_message(f'Не найден документ с кодом {_code}')
 
     def fill_header(self):
-        if not self.ui.init_GUI:
-            return
         doc = self.model.doc()
         self.ui.doc_name.setText(str(doc))
         self.ui.storage.setText(str(doc.storage))
@@ -197,20 +180,14 @@ class DocumentWindow(QDialog):
 
 
     def fill_table_header(self):
-        if not self.ui.init_GUI:
-            return
         self.ui.doc_tbl.setItem(0, 1, QTableWidgetItem('Код'))
         self.ui.doc_tbl.setItem(0, 2, QTableWidgetItem('Номенклатура'))
         self.ui.doc_tbl.setItem(0, 3, QTableWidgetItem('Количество'))
         self.ui.doc_tbl.setItem(0, 4, QTableWidgetItem('Статус'))
         self.ui.doc_tbl.setItem(0, 5, QTableWidgetItem('Полка'))
         self.ui.doc_tbl.setItem(0, 6, QTableWidgetItem('Пол'))
-        # self.ui.doc_tbl.setItem(0, 7, QTableWidgetItem('Отменено'))
-        # self.ui.doc_tbl.setItem(0, 8, QTableWidgetItem('Причина отмены'))
 
     def fill_table(self):
-        if not self.ui.init_GUI:
-            return
         doc = self.model.db.get_doc(self.model.doc_link)
         db = self.model.db
         strings = db.get_doc_strings(doc.link)

@@ -14,6 +14,7 @@ class DB(LoggerSuper):
     """
     logger = logging.getLogger('DB')
     def __init__(self):
+        self.online = False
         self.clear_db()
 
 # Функции очистки базы
@@ -41,51 +42,16 @@ class DB(LoggerSuper):
 
 # Функции добавления в списки
     def add_nomenclature(self, code, name):
-        for nom in self._nomenclature:
-            if nom.code == code:
-                nom.name = name
-                return
         self._nomenclature.append(Nomenclature(code, name))
 
-    def add_document(self, link, num, date, date_sending, type, storage, status, execute_to, team_leader, team_number, start_time, end_time, destination, autos_number):
-        for doc in self._documents:
-            if doc.link == link:
-                doc.num = num
-                doc.date = date
-                doc.date_sending = date_sending
-                doc.type = type
-                doc.storage = storage
-                doc.status = status
-                doc.execute_to = execute_to
-                doc.team_leader = team_leader
-                doc.team_number = team_number
-                doc.start_time = start_time
-                doc.end_time = end_time
-                doc.destination = destination
-                doc.autos_number = autos_number
-                return
-        self._documents.append(Document(link, num, date, date_sending, type, storage, status, execute_to, team_leader, team_number, start_time, end_time, destination, autos_number))
+    def add_document(self, link, num, date, date_sending, type, storage, status, execute_to, team_leader, team_number, team_date, start_time, end_time, destination, autos_number):
+        self._documents.append(Document(link, num, date, date_sending, type, storage, status, execute_to, team_leader, team_number, team_date, start_time, end_time, destination, autos_number))
 
     def add_doc_table_string(self, doc_link, num, nomenclature_code, amount, status, adress_shelf, adress_floor, cancelled, reason_for_cancellation):
         _nomenclature = self.get_nomenclature(nomenclature_code)
-        for doc_string in self._doc_strings:
-            if doc_string.doc_link == doc_link and doc_string.num == num:
-                doc_string.nomenclature = _nomenclature
-                doc_string.amount = amount
-                doc_string.status = status
-                doc_string.adress_shelf = adress_shelf
-                doc_string.adress_floor = adress_floor
-                doc_string.cancelled = cancelled
-                doc_string.reason_for_cancellation = reason_for_cancellation
-                return
         self._doc_strings.append(DocumentTableString(doc_link, num, _nomenclature, amount, status, adress_shelf, adress_floor, cancelled, reason_for_cancellation))
 
     def add_employee(self, name, card_number, role):
-        for employee in self._employees:
-            if employee.card_number == card_number:
-                employee.name = name
-                employee.role = role
-                return
         self._employees.append(Employee(name, card_number, role))
 
     def add_team(self, num, date, team_leader, terminal_api):
@@ -93,11 +59,6 @@ class DB(LoggerSuper):
         if tl is None:
             self.logger.error(f'Team leader "{team_leader}" is not exists in Employees. Team {num}.')
             return
-        for team in self._teams:
-            if team.num == num and team.date == date:
-                team.team_leader = tl
-                team.terminal_api = terminal_api
-                return
         self._teams.append(Team(num, date, tl, terminal_api))
 
     def add_employee_connection(self, card_number, team_num, team_date):
@@ -109,10 +70,6 @@ class DB(LoggerSuper):
         if employee is None:
             self.logger.error(f'employee with card number "{card_number} is not exists in _employees.')
             return
-
-        for ec in self._employee_connections:
-            if ec.employee == employee and ec.team == team:
-                return
         self._employee_connections.append(Employee_connection(employee, team))
 
 # Вспомогательные функции

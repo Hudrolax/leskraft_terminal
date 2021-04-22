@@ -75,7 +75,7 @@
         <enum>Qt::LeftToRight</enum>
        </property>
        <property name="text">
-        <string>Создание команды</string>
+        <string>Регистрация бригады</string>
        </property>
       </widget>
      </item>
@@ -117,7 +117,7 @@
         </font>
        </property>
        <property name="text">
-        <string>Отсканируйте карту участника команды</string>
+        <string>Отсканируйте карту участника бригады</string>
        </property>
       </widget>
      </item>
@@ -264,7 +264,7 @@
             </font>
            </property>
            <property name="text">
-            <string>Для окончания формирования команды еще раз отсканируйте карту кладовщика</string>
+            <string>Для окончания формирования бригады еще раз отсканируйте карту кладовщика</string>
            </property>
           </widget>
          </item>
@@ -309,51 +309,11 @@
          <column/>
         </widget>
        </item>
-       <item>
-        <layout class="QHBoxLayout" name="horizontalLayout_3">
-         <item>
-          <spacer name="horizontalSpacer_5">
-           <property name="orientation">
-            <enum>Qt::Horizontal</enum>
-           </property>
-           <property name="sizeHint" stdset="0">
-            <size>
-             <width>40</width>
-             <height>20</height>
-            </size>
-           </property>
-          </spacer>
-         </item>
-         <item>
-          <widget class="QLineEdit" name="lineEdit"/>
-         </item>
-         <item>
-          <widget class="QPushButton" name="pushButton">
-           <property name="text">
-            <string>ввод</string>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <spacer name="horizontalSpacer_6">
-           <property name="orientation">
-            <enum>Qt::Horizontal</enum>
-           </property>
-           <property name="sizeHint" stdset="0">
-            <size>
-             <width>40</width>
-             <height>20</height>
-            </size>
-           </property>
-          </spacer>
-         </item>
-        </layout>
-       </item>
       </layout>
      </widget>
      <widget class="QWidget" name="register_team">
       <attribute name="title">
-       <string>Регистрация команды</string>
+       <string>Регистрация бригады</string>
       </attribute>
       <layout class="QVBoxLayout" name="verticalLayout_4">
        <item>
@@ -395,7 +355,7 @@
             </font>
            </property>
            <property name="text">
-            <string>Команда зарегистрирована</string>
+            <string>Бригада зарегистрирована</string>
            </property>
           </widget>
          </item>

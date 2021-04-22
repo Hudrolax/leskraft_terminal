@@ -1,41 +1,53 @@
-from views.doc_window import DocumentWindow
-from models.doc_window_model import DocumentForm_model
 from views.error_message_window import Error_window
 from utility.print import get_pdf_and_print
+from utility.logger_super import LoggerSuper
 import logging
+from PyQt5 import QtCore
 
 
-class DocForm_controller:
+class DocForm_controller(LoggerSuper):
     logger = logging.getLogger('Document_controller')
-    def __init__( self, parent, doc_link):
-        self.main_controller = parent  # Main form controller
-        self.model = DocumentForm_model(self, self.main_controller.model.db, doc_link)
-        self.window = DocumentWindow(self, self.model, self.main_controller.window)
+    def __init__( self, window):
+        self.window = window
 
-        self.getted_bar_code = ''  # атрибут для хранения принятого баркода от потока сканера
-        self.getted_RFID_code = ''  # атрибут для хранения принятого RFID от потока сканера
-
-        self.main_controller.bar_scanner.remove_observer(self.main_controller)
-        self.main_controller.bar_scanner.add_observer(self)
-        self.main_controller.rfid_scanner.add_observer(self)
-        self.main_controller.rfid_scanner.remove_observer(self.main_controller)
-
-    def get_bar_code(self, bar_code):
-        self.logger.debug(f'dget bar_code: {bar_code}')
-        self.getted_bar_code = bar_code  # Помещаем код в атрибут, который проверяется в потоке формы
+    def get_QR_signal(self, bar_code):
+        self.logger.info(f'get QR_code: {bar_code}')
+        if self.window.model.team is None:
+            return
 
     def get_RFID_signal(self, rfid_code):
-        self.logger.debug(f'get RFID_code: {rfid_code}')
-        self.getted_RFID_code = rfid_code  # Помещаем код в атрибут, который проверяется в потоке формы
+        self.logger.info(f'get RFID_code: {rfid_code}')
+        if self.window.model.team is not None or self.window.model.doc().team_number != 0:
+            self.window._show_status_message(f'Для этого документа уже установлена бригада!')
+            self._timer = QtCore.QTimer()
+            self._timer.setSingleShot(True)
+            self._timer.timeout.connect(self.window.fill_header)
+            self._timer.start(3000)
+            return
+
+        _teams = self.window.model.db.get_team_by_emloyee_code(rfid_code)
+        if len(_teams) > 0:
+            if len(_teams) > 1:
+                pass
+                # self._open_choice_team_window(_teams)
+                # if self.choosed_team is not None:
+                #     self.model.team = self.choosed_team
+                #     self.choosed_team = None
+                #     self.choice_team_window = None
+            else:
+                self.window.model.team = _teams[0]
+                self.window.fill_header()
+        else:
+            self.window._show_status_message(f'Не найдена бригада с сотрудником с номером карты {rfid_code}')
 
     def click_print_btn(self):
-        result = get_pdf_and_print(self.model.doc_link)
+        result = get_pdf_and_print(self.window.model.doc_link)
         if result != "":
             Error_window(self.window, f'{result}')
 
 
     def start_work_with_document(self):
-        result = self.model.start_work_with_document()
+        result = self.window.model.start_work_with_document()
         if result != 'ok':
             Error_window(self.window , f'{result}')
             return False
@@ -43,7 +55,7 @@ class DocForm_controller:
             return True
 
     def stop_work_with_document(self):
-        result = self.model.stop_work_with_document()
+        result = self.window.model.stop_work_with_document()
         if result != 'ok':
             Error_window(self.window, f'{result}')
             return False
@@ -51,12 +63,8 @@ class DocForm_controller:
             return True
 
     def close_window(self):
-        self.main_controller.bar_scanner.add_observer(self.main_controller)
-        self.main_controller.bar_scanner.remove_observer(self)
-        self.main_controller.rfid_scanner.remove_observer(self)
-        self.main_controller.rfid_scanner.add_observer(self.main_controller)
         self.window.close()
-
-    # def click_checkbox(self, str_num, checked, reason):
-    #     print(f'str {str_num} is {checked}')
-    #     return self.model.cancel_string(str_num, checked, reason)
+        # отключим сканеры от формы документа и подключим их обратно к основной форме
+        self.window.main_window.controller.connect_scanners_to_main_form()
+        self.window.main_window.controller.create_team_window = None
+        del self.window

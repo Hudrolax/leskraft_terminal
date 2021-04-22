@@ -6,8 +6,8 @@ import requests
 
 class DocumentForm_model(LoggerSuper):
     logger = logging.getLogger('doc_form_model')
-    def __init__(self, controller, db, doc_link):
-        self.controller = controller
+    def __init__(self, db, doc_link, main_window):
+        self.main_window = main_window
         self.db = db
         self.doc_link = doc_link
         self.team = None
@@ -60,7 +60,3 @@ class DocumentForm_model(LoggerSuper):
         except Exception as e:
             self.logger.critical(e)
             return str(e)
-
-    # def cancel_string(self, str_num, cancelled, reason):
-    #     #     print(f'док {self.doc} строка {str_num} {cancelled} {reason}')
-    #     #     return True

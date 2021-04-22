@@ -4,95 +4,29 @@ from utility.logger_super import LoggerSuper
 from models.data_base import DB
 from env import *
 import logging
-from utility.threaded_class import Threaded_class
-from views.error_message_window import Error_window
-from views.main_window import MainWindow
-from config import *
-import threading
+from config import AUTO_UPDATE_TIME, CONNECTION_TIMEOUT
 from PyQt5 import QtCore
 
-
-class MainModel(Threaded_class, LoggerSuper):
-
-    logger = logging.getLogger('MainModel')
+# класс для заполнения БД в отдельном потоке
+class DBUpdateHandler(QtCore.QObject, LoggerSuper):
+    update_GUI_signal = QtCore.pyqtSignal(object)
+    logger = logging.getLogger('DBUpdateHandler')
     def __init__(self):
-        self._update = False
-        self._observers = []  # список наблюдателей
-        self.db = DB()
-        self._getdata_thread = threading.Thread(target=self._threaded_get_data, args=(), daemon=False)
-        self._getdata_thread.start()
-        self._online = False
+        super().__init__()
+        self.db = None
 
-    def get_online_status(self):
-        return self._online
-
-    def update(self):
-        if AUTO_UPDATE:
-            self._update = True
-            while self._update:
-                QtCore.QThread.msleep(100)
-
-            return True
-        else:
-            return False
-
-    def _threaded_get_data(self):
-        while self.working:
-            if AUTO_UPDATE:
-                self.get_docs()
-                self.get_employees()
-                self.get_teams()
-                self.get_employee_connections()
-                self.interrupted_sleep(AUTO_UPDATE_TIME)
-
-    def interrupted_sleep(self, pause):
-        for k in range(10, pause*10):
-            if self.working and not self._update:
-                QtCore.QThread.msleep(100)
-            elif self._update:
-                self._update = False
-                return
-            else:
-                return
-
-    @staticmethod
-    def get_http_data_static(route, parameters=''):
-        try:
-            answer = requests.get(f'http://{SERVER}/{BASE_NAME}{route}?api_key={API_KEY}{parameters}',
-                                   auth=(USER, PASSWORD), timeout=3)
-            if answer.status_code == 200:
-                return answer.content
-            else:
-                MainModel.logger.error(f'http_get {route} status code {answer.status_code}:{answer.content.decode()}')
-                return None
-        except Exception as ex:
-            try:
-                answer =  requests.get(f'http://{SERVER2}/{BASE_NAME}{route}?api_key={API_KEY}{parameters}',
-                                       auth=(USER, PASSWORD), timeout=3)
-                if answer.status_code == 200:
-                    return answer.content
-                else:
-                    MainModel.logger.error(f'http_get {route} status code {answer.status_code}:{answer.content.decode()}')
-                    return None
-            except:
-                return None
-
-    def get_http_data(self, route, func):
-        try:
-            content = self.get_http_data_static(route)
-            if content is not None:
-                content = content.decode()
-            else:
-                raise Exception('exaption content is None')
-
-            decoded_json = json.loads(content)
-            self.logger.debug(f'Get JSON: {decoded_json}')
-            func(decoded_json)
-            self._online = True
-        except Exception as e:
-            self._online = False
-            self.logger.error(e)
-            QtCore.QThread.msleep(3000)
+    # метод, который будет выполнять алгоритм в другом потоке
+    def run(self):
+        while True:
+            # print(f'начало запроса БД')
+            self.db = DB()  # База, создаваемая для получения и передачи в основную базу
+            self.get_docs()
+            self.get_employees()
+            self.get_teams()
+            self.get_employee_connections()
+            # print(f'конец запроса БД')
+            self.update_GUI_signal.emit(self.db)
+            QtCore.QThread.sleep(AUTO_UPDATE_TIME)
 
     def _get_docs(self, decoded_json):
         json_docs = decoded_json.get('docs')
@@ -109,6 +43,7 @@ class MainModel(Threaded_class, LoggerSuper):
             args.append(json_doc.get('execute_to'))
             args.append(json_doc.get('team_leader'))
             args.append(json_doc.get('team_number'))
+            args.append(json_doc.get('team_date'))
             args.append(json_doc.get('start_time'))
             args.append(json_doc.get('end_time'))
             args.append(json_doc.get('destination'))
@@ -176,19 +111,59 @@ class MainModel(Threaded_class, LoggerSuper):
     def get_employee_connections(self):
         self.get_http_data(GET_EMPLOYEE_CONNECTIONS_ROUTE, self._get_employee_connections)
 
+    def get_http_data(self, route, func):
+        try:
+            content = self.get_http_data_static(route)
+            if content is not None:
+                content = content.decode()
+            else:
+                raise Exception('exaption content is None')
 
-    def show_error_message(self, message, exit):
-        for observer in self._observers:
-            if isinstance(observer, MainWindow):
-                QtCore.QThread.msleep(1000)
-                Error_window(observer, message, exit)
-                return
+            decoded_json = json.loads(content)
+            self.logger.debug(f'Get JSON: {decoded_json}')
+            func(decoded_json)
+            self.db.online = True
+        except Exception as e:
+            self.db.online = False
+            self.logger.error(e)
+            QtCore.QThread.msleep(3000)
 
-if __name__ == '__main__':
-    model = MainModel()
-    model.get_docs()
-    for doc in model.db.documents:
-        model.db.get_fuul_doc_description(doc.link)
-    model.get_employees()
-    model.get_teams()
-    Threaded_class.stop()
+    @staticmethod
+    def get_http_data_static(route, parameters=''):
+        try:
+            answer = requests.get(f'http://{SERVER}/{BASE_NAME}{route}?api_key={API_KEY}{parameters}',
+                                  auth=(USER, PASSWORD), timeout=CONNECTION_TIMEOUT)
+            if answer.status_code == 200:
+                return answer.content
+            else:
+                MainModel.logger.error(f'http_get {route} status code {answer.status_code}:{answer.content.decode()}')
+                return None
+        except Exception as ex:
+            try:
+                answer = requests.get(f'http://{SERVER2}/{BASE_NAME}{route}?api_key={API_KEY}{parameters}',
+                                      auth=(USER, PASSWORD), timeout=CONNECTION_TIMEOUT)
+                if answer.status_code == 200:
+                    return answer.content
+                else:
+                    MainModel.logger.error(
+                        f'http_get {route} status code {answer.status_code}:{answer.content.decode()}')
+                    return None
+            except:
+                return None
+
+class MainModel(LoggerSuper):
+    logger = logging.getLogger('MainModel')
+    def __init__(self, main_window):
+        self.main_window = main_window
+        self.db = DB() # основная база данных
+
+        # поток запроса данных из 1С
+        self.db_update_thread = QtCore.QThread()
+        self.db_update_handler = DBUpdateHandler()
+        self.db_update_handler.moveToThread(self.db_update_thread)
+        self.db_update_handler.update_GUI_signal.connect(self.slot_update_UI)
+        self.db_update_thread.started.connect(self.db_update_handler.run)
+        self.db_update_thread.start()
+
+    def slot_update_UI(self, db):
+        self.db = db # записываем заполненный объект БД в объект БД модели

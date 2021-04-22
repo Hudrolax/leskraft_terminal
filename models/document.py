@@ -37,7 +37,7 @@ class DocumentTableString:
 class Document:
     logger = logging.getLogger('document')
 
-    def __init__(self, link, num, date, date_sending, type, storage, status, execute_to, team_leader, team_number, start_time, end_time, destination, autos_number):
+    def __init__(self, link, num, date, date_sending, type, storage, status, execute_to, team_leader, team_number, team_date, start_time, end_time, destination, autos_number):
         """
         :param link: тип строка. Цифровое представление ссылки на документ (как в QR коде)
         :param num: тип строка. Номер документа.
@@ -49,6 +49,7 @@ class Document:
         :param execute_to: тип дата. Дата, до которой задание должно быть выполнено.
         :param team_leader: тип строка. ФИО кладовщика, чья команда взяла задание.
         :param team_number: тип число. Номер документа ЛК_ФормированиеСкладскойБригады
+        :param self.team_date тип дата. Дата документа ЛК_ФормированиеСкладскойБригады
         :param start_time: тип дата. Дата начала исполнения задания.
         :param end_time: тип дата. Дата окончания исполнения задания.
         :param destination: тип строка. Куда грузить (Клиент, Склад, Место хранения)
@@ -64,14 +65,12 @@ class Document:
         self._execute_to = date_setter(execute_to)
         self.team_leader = team_leader
         self.team_number = team_number
+        self.team_date = date_setter(team_date)
         self._start_time = date_setter(start_time)
         self._end_time = date_setter(end_time)
         self.destination = destination
         self.autos_number = autos_number
-        self.table = None
-
-    def print_form(self):
-        get_pdf_and_print(self.link)
+        # self.table = None
 
     @staticmethod
     def return_date_str(date):

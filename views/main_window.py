@@ -1,19 +1,19 @@
 from PyQt5.QtWidgets import QMainWindow, QDialog, QTableWidgetItem, QPushButton, QApplication, QHeaderView
-from PyQt5.QtGui import QFont, QPixmap, QColor
+from PyQt5.QtGui import QFont, QPixmap
 from PyQt5 import QtCore, QtGui
 from views.ui.main_ui import Ui_MainWindow
-from utility.threaded_class import Threaded_class
 from config import *
 from PyQt5.QtCore import QFile, QTextStream, Qt
 import logging
 from utility.logger_super import LoggerSuper
-import sys
 from datetime import datetime
 from env import FULLSCREEN,PRINTER_NAME,RFID_SCANNER_PID,BAR_SCANNER_PID
-from utility.qt5_timer import TimerHandler
 from utility.qt5_windows import center_on_screen
 from utility.print import find_printer_by_name
 from utility.com_ports import find_hwid
+
+from controllers.main_controller import MainController
+from models.main_model import MainModel
 # import keyboard
 
 class GUI_Main_Window(Ui_MainWindow, LoggerSuper):
@@ -26,7 +26,6 @@ class GUI_Main_Window(Ui_MainWindow, LoggerSuper):
 
         pixmap = QPixmap('res/img/logo.png')
         self.logo_label.setPixmap(pixmap)
-        self.init_GUI = True
 
         clock_separator_color = '#000000'
         palette = self.time_lcd_hour.palette()
@@ -73,10 +72,10 @@ class GUI_Main_Window(Ui_MainWindow, LoggerSuper):
 
 class MainWindow(QMainWindow):
     logger = logging.getLogger('Main_Window')
-    def __init__(self, controller, model, parent = None):
-        super(QMainWindow, self).__init__(parent)
-        self.controller = controller
-        self.model = model
+    def __init__(self, parent = None):
+        super(QMainWindow, self).__init__()
+        self.controller = MainController(self) # объект для обработки действий пользователя
+        self.model = MainModel(self) # объект для взаимодействия с сервером
 
         self._show_connection_error_flag = False
         self._show_create_team_error_flag = False
@@ -91,22 +90,18 @@ class MainWindow(QMainWindow):
         self.hide_reboot_btn()
 
         self.ui.exit_btn.clicked.connect(self.controller.click_exit_btn)
-        self.ui.create_team_btn.clicked.connect(self.controller.click_commands_btn)
+        self.ui.create_team_btn.clicked.connect(self.controller.click_create_team_btn)
         self.ui.teamslist_btn.clicked.connect(self.controller.click_teamslist_btn)
-        # создадим поток обновления ТЧ по таймеру
-        self.table_timer_thread = QtCore.QThread()
-        self.table_timer_handler = TimerHandler(1000)
-        self.table_timer_handler.moveToThread(self.table_timer_thread)
-        self.table_timer_handler.timer_signal.connect(self._fill_table_by_timer)
-        self.table_timer_thread.started.connect(self.table_timer_handler.run)
-        self.table_timer_thread.start()
-        # создадим поток обновления часов по таймеру
-        self.clock_timer_thread = QtCore.QThread()
-        self.clock_timer_handler = TimerHandler(100)
-        self.clock_timer_handler.moveToThread(self.clock_timer_thread)
-        self.clock_timer_handler.timer_signal.connect(self._fill_clock_by_timer)
-        self.clock_timer_thread.started.connect(self.clock_timer_handler.run)
-        self.clock_timer_thread.start()
+
+        # обновления ТЧ по таймеру
+        self.update_tbl_timer = QtCore.QTimer()
+        self.update_tbl_timer.timeout.connect(self._fill_table_by_timer)
+        self.update_tbl_timer.start(1000)
+
+        # обновления часов по таймеру
+        self.update_clock_timer = QtCore.QTimer()
+        self.update_clock_timer.timeout.connect(self._fill_clock_by_timer)
+        self.update_clock_timer.start(1000)  # every 1000 milliseconds
 
         if not FULLSCREEN:
             self.showNormal()
@@ -183,7 +178,7 @@ class MainWindow(QMainWindow):
             self.ui.val_printer.setText(error_text)
             error = True
 
-        if self.model.get_online_status():
+        if self.model.db.online:
             self.ui.val_server.setStyleSheet(f'color: {ok_color}')
             self.ui.val_server.setText(ok_text)
         else:
@@ -212,17 +207,11 @@ class MainWindow(QMainWindow):
         else:
             self.hide_reboot_btn()
 
-
-
-    # def show_exit_btn(self):
-    #     self.ui.exit_btn.setVisible(not self.ui.exit_btn.isVisible())
-
     def load_style(self):
         file = QFile(STYLE_PATH)
         if not file.open(QFile.ReadOnly | QFile.Text):
             self.logger.critical(f'Style {STYLE_PATH} not found.')
-            Threaded_class.stop()
-            sys.exit(self)
+            self.close()
 
         qss_file = QTextStream(file)
         _txt = qss_file.readAll()
@@ -232,7 +221,6 @@ class MainWindow(QMainWindow):
         file.close()
 
     def closeEvent(self, event):
-        Threaded_class.stop()
         print("User has clicked the red x on the main window")
         event.accept()
 
@@ -242,8 +230,6 @@ class MainWindow(QMainWindow):
         dlg.exec_()
 
     def fill_header(self):
-        if not self.ui.init_GUI:
-            return
         self.ui.tbl1.setItem(0, 0, QTableWidgetItem('№'))
         self.ui.tbl1.setItem(0, 1, QTableWidgetItem('От'))
         self.ui.tbl1.setItem(0, 2, QTableWidgetItem('Поступило'))
@@ -259,7 +245,6 @@ class MainWindow(QMainWindow):
         self.ui.tbl1.setItem(0, 12, QTableWidgetItem(''))
 
         self.ui.set_table_header_style()
-        self.ui.tbl1.update()
 
     def _get_tbl_item(self, val, color=None):
         _item = QTableWidgetItem(str(val))
@@ -268,8 +253,6 @@ class MainWindow(QMainWindow):
         return _item
 
     def fill_table(self):
-        if not self.ui.init_GUI:
-            return
         self.ui.tbl1.setRowCount(1)
         self.ui.tbl1.setRowCount(len(self.model.db.documents) + 1)
         _str = 1
@@ -316,12 +299,7 @@ class MainWindow(QMainWindow):
             self._tbl_blink = _blnk
 
         self._tbl_blink = not self._tbl_blink
-        # делаем ресайз колонок по содержимому
-        QtCore.QThread.msleep(100)
-        # self.ui.tbl1.resizeColumnsToContents()
-        self.ui.tbl1.update()
 
-    @QtCore.pyqtSlot()
     def _fill_clock_by_timer(self):
         def format_digit(digit):
             _digit = str(digit)
@@ -329,20 +307,12 @@ class MainWindow(QMainWindow):
                 return '0' + _digit
             return _digit
 
-        if not self.ui.init_GUI:
-            return
         self.ui.time_lcd_hour.display(format_digit(datetime.now().hour))
         self.ui.time_lcd_minute.display(format_digit(datetime.now().minute))
         self.ui.time_lcd_second.display(format_digit(datetime.now().second))
 
-        if self.controller.getted_bar_code != '':
-            _bar_code = self.controller.getted_bar_code
-            self.controller.getted_bar_code = ''
-            self._open_doc(_bar_code)
-
-    @QtCore.pyqtSlot()
     def _fill_table_by_timer(self):
-        if self.model.get_online_status():
+        if self.model.db.online:
             self._hide_connection_error()
             self.fill_table()
         else:

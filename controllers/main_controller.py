@@ -1,51 +1,148 @@
-from views.main_window import MainWindow
-from controllers.doc_form_controller import DocForm_controller
-from controllers.create_team_controller import CreateTeam_controller
-from controllers.team_list_controller import TeamList_controller
-from utility.threaded_class import Threaded_class
-from controllers.RFID_scanner import RFIDScanner
-from controllers.barcode_scanner import BarScanner
+from views.create_team_window import CreateTeamWindow
+from views.team_list_window import TeamListWindow
+from views.doc_window import DocumentWindow
+
+from utility.com_ports import COM_port
 from env import RFID_SCANNER_PID, BAR_SCANNER_PID
 from utility.reboot import reboot
-import sys
+from PyQt5 import QtCore
+from utility.logger_super import LoggerSuper
 import logging
 
 class MainController:
     logger = logging.getLogger('Main_controller')
-    def __init__( self, model):
-        self.model = model
-        self.rfid_scanner = RFIDScanner(RFID_SCANNER_PID)
-        self.rfid_scanner.add_observer(self)
-        self.bar_scanner = BarScanner(BAR_SCANNER_PID)
-        self.bar_scanner.add_observer(self)
-        self.window = MainWindow(self, model)
-
-        self.getted_bar_code = ''  # атрибут для хранения принятого баркода от потока сканера
-        self.getted_RFID_code = ''  # атрибут для хранения принятого RFID от потока сканера
+    def __init__( self, main_window):
+        self.main_window = main_window
+        self.create_team_window = None
+        self.team_list_window = None
+        self.doc_window = None
+        # поток работы с QR
+        self.QR_thread = QtCore.QThread()
+        self.QR_handler = QR_CodeScanner_Handler()
+        self.QR_handler.moveToThread(self.QR_thread)
+        self.QR_handler.get_QR_code_signal.connect(self.get_QR_signal)
+        self.QR_thread.started.connect(self.QR_handler.run)
+        self.QR_thread.start()
+        # поток работы с RFID
+        self.RFID_thread = QtCore.QThread()
+        self.RFID_handler = RFIF_Scanner_Handler()
+        self.RFID_handler.moveToThread(self.RFID_thread)
+        self.RFID_handler.get_RFID_code_signal.connect(self.get_RFID_signal)
+        self.RFID_thread.started.connect(self.RFID_handler.run)
+        self.RFID_thread.start()
 
     def get_RFID_signal(self, code):
-        self.logger.debug(f'get RFID_code: {code}')
-        self.getted_RFID_code = code  # Помещаем код в атрибут, который проверяется в потоке формы
+        self.logger.info(f'get RFID_code: {code}')
 
-    def get_bar_code(self, bar_code):
-        if self.window._show_create_team_error_flag or self.window._show_create_team_error_flag or self.window._show_connection_error_flag:
-            return
-        self.logger.debug(f'get bar_code: {bar_code}')
-        self.getted_bar_code = bar_code # Помещаем код в атрибут, который проверяется в потоке формы
+    def get_QR_signal(self, code):
+        self.logger.info(f'get QR_code: {code}')
+        self.open_document_window(code)
+
+    def disconnect_scanners_from_main_form(self):
+        self.QR_handler.get_QR_code_signal.disconnect(self.get_QR_signal)
+        self.RFID_handler.get_RFID_code_signal.disconnect(self.get_RFID_signal)
+
+    def connect_scanners_to_main_form(self):
+        try:
+            self.QR_handler.get_QR_code_signal.disconnect()
+        except TypeError:
+            pass
+        try:
+            self.RFID_handler.get_RFID_code_signal.disconnect()
+        except TypeError:
+            pass
+        self.QR_handler.get_QR_code_signal.connect(self.get_QR_signal)
+        self.RFID_handler.get_RFID_code_signal.connect(self.get_RFID_signal)
 
     def open_document_window(self, doc_link):
-        doc_controller = DocForm_controller(self, doc_link)
+        self.doc_window = DocumentWindow(self.main_window.model.db, doc_link, self.main_window)
+        # отключим сигналы сканеров от основной формы
+        self.disconnect_scanners_from_main_form()
+        # подключим сигналы сканнеров к форме документа
+        self.RFID_handler.get_RFID_code_signal.connect(self.doc_window.controller.get_RFID_signal)
+        self.QR_handler.get_QR_code_signal.connect(self.doc_window.controller.get_QR_signal)
 
-    def click_commands_btn(self):
-        login_controller = CreateTeam_controller(self)
+    def click_create_team_btn(self):
+        self.create_team_window = CreateTeamWindow(self.main_window.model.db, self.main_window)
+        # отключим сигналы сканеров от основной формы
+        self.disconnect_scanners_from_main_form()
+        # подключим сигнал сканера к форме регистрации
+        self.RFID_handler.get_RFID_code_signal.connect(self.create_team_window.controller.get_RFID_signal)
 
     def click_teamslist_btn(self):
-        team_list_controller = TeamList_controller(self)
+        # отключим сигналы сканеров от основной формы
+        self.disconnect_scanners_from_main_form()
+        self.team_list_window = TeamListWindow(self.main_window.model.db, self.main_window)
 
     def click_reboot_btn(self):
         self.logger.info('User pressed the reboot button!')
         reboot()
 
     def click_exit_btn(self):
-        Threaded_class.stop()
-        sys.exit()
+        self.main_window.close()
+
+# класс для работы со сканером QR в отдельном потоке
+class QR_CodeScanner_Handler(QtCore.QObject, COM_port, LoggerSuper):
+    get_QR_code_signal = QtCore.pyqtSignal(str)
+    logger = logging.getLogger('QR_CodeScanner_Handler')
+
+    def __init__(self):
+        super().__init__(name='QRScanner', PID=BAR_SCANNER_PID, speed=9600, timeout=500)
+
+    def run(self):
+        while True:
+            _qr_code = ''
+            if self.initialized:
+                try:
+                    _qr_code = self.serial.readline().decode().replace('\r\n', '')
+                except:
+                    self.initialized = False
+                    self.inicialize_com_port()
+
+                if _qr_code != '':
+                    if _qr_code.find('t=') == -1:
+                        self.get_QR_code_signal.emit(_qr_code)
+                    else:
+                        self.logger.warning(f'Got wrong code format: {_qr_code}')
+            else:
+                QtCore.QThread.msleep(1000)
+                self.inicialize_com_port()
+
+# класс для работы со сканером RFID в отдельном потоке
+class RFIF_Scanner_Handler(QtCore.QObject, COM_port, LoggerSuper):
+    get_RFID_code_signal = QtCore.pyqtSignal(str)
+    logger = logging.getLogger('RFIF_Scanner_Handler')
+    def __init__(self):
+        super().__init__(name='RFIDScanner', PID=RFID_SCANNER_PID, speed=9600, timeout=500)
+        self.id = '00'
+
+    # метод, который будет выполнять алгоритм в другом потоке
+    def run(self):
+        buffer = b''
+        while True:
+            if self.initialized:
+                try:
+                    buffer += self.serial.read()
+                except:
+                    self.initialized = False
+                    continue
+
+                str_buffer = buffer.decode()
+                if str_buffer.find('#S'+self.id) > -1:
+                    buffer = b''
+                    continue
+                if str_buffer.startswith('#F'+self.id) and len(str_buffer) == 14:
+                    buffer = b''
+                    str_buffer = str_buffer.replace('#F'+self.id+'2D00', '')
+                    try:
+                        card_id =  int(str_buffer, 16)
+                    except Exception as e:
+                        self.logger.error(f'decode to int error "{str_buffer}"')
+                        continue
+                    card_id = str(card_id)
+                    self.logger.debug(f'get RFID code {card_id}')
+                    self.get_RFID_code_signal.emit(card_id)
+            else:
+                buffer = b''
+                QtCore.QThread.msleep(1000)
+                self.inicialize_com_port()
