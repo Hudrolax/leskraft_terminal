@@ -14,6 +14,12 @@ class GUI_choice_team(Ui_choice_team_form, LoggerSuper):
         self.tbl.setRowCount(1)
         self.tbl.setColumnCount(4)
 
+    def set_table_header_style(self):
+        self.tbl.item(0, 0).setFont(QFont("Consolas", 18, QFont.Bold))
+        for col in range(1, self.tbl.columnCount()):
+            self.tbl.item(0, col).setFont(QFont("Consolas", 14, QFont.Bold))
+            self.tbl.item(0, col).setTextAlignment(Qt.AlignCenter | Qt.AlignCenter)
+
 class ChoiceTeamWindow(QDialog):
     logger = logging.getLogger('Choice_team_form')
     def __init__(self, teams, parent):
@@ -49,7 +55,7 @@ class ChoiceTeamWindow(QDialog):
         self.ui.tbl.setColumnWidth(2, 100)
         self.ui.tbl.setColumnWidth(3, 150)
         self.ui.tbl.horizontalHeader().setSectionResizeMode(2, QHeaderView.Stretch)
-        self.set_table_header_style()
+        self.ui.set_table_header_style()
 
     def fill_table(self):
         self.ui.tbl.setRowCount(len(self.teams) + 1)
