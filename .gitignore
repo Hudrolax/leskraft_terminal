@@ -141,3 +141,4 @@ dmypy.json
 *.stl
 log_*.txt
 *.sh
+config.py
