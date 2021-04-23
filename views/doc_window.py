@@ -29,11 +29,6 @@ class GUI_Doc_Window(Ui_doc_form, LoggerSuper):
         resolution = QApplication.desktop().availableGeometry()
         window.resize(round(resolution.width()*0.9), round(resolution.height()*0.9))
 
-    def set_table_header_style(self):
-        self.doc_tbl.item(0, 0).setFont(QFont("Consolas", 18, QFont.Bold))
-        for col in range(1, self.doc_tbl.columnCount()):
-            self.doc_tbl.item(0, col).setFont(QFont("Consolas", 14, QFont.Bold))
-            self.doc_tbl.item(0, col).setTextAlignment(Qt.AlignCenter | Qt.AlignCenter)
 
 class DocumentWindow(QDialog):
     logger = logging.getLogger('Document_Form')

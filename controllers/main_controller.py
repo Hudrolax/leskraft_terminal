@@ -111,7 +111,7 @@ class QR_CodeScanner_Handler(QtCore.QObject, COM_port, LoggerSuper):
                     else:
                         self.logger.warning(f'Got wrong code format: {_qr_code}')
             else:
-                QtCore.QThread.msleep(1000)
+                QtCore.QThread.msleep(5000)
                 self.inicialize_com_port()
 
 # класс для работы со сканером RFID в отдельном потоке
@@ -150,7 +150,7 @@ class RFIF_Scanner_Handler(QtCore.QObject, COM_port, LoggerSuper):
                     self.get_RFID_code_signal.emit(card_id)
             else:
                 buffer = b''
-                QtCore.QThread.msleep(1000)
+                QtCore.QThread.msleep(5000)
                 self.inicialize_com_port()
 
 # класс для работы с вотчдогом в отдельном потоке

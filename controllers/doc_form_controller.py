@@ -56,6 +56,7 @@ class DocForm_controller(LoggerSuper):
                     self.window.model.team = self.choosed_team
                     self.choosed_team = None
                     self.choice_team_window = None
+                    self.window.fill_header()
                 else:
                     self.show_message_with_timer('Что-то пошло не так. Обратитесь к разработчику.')
             else:

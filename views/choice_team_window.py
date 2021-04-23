@@ -2,7 +2,6 @@ from views.ui.choice_team_ui import Ui_choice_team_form
 from utility.logger_super import LoggerSuper
 from PyQt5.QtWidgets import QDialog, QTableWidgetItem, QHeaderView, QPushButton, QApplication
 from PyQt5.QtCore import Qt
-from PyQt5 import QtCore
 from PyQt5.QtGui import QFont
 from utility.qt5_windows import center_on_screen
 import logging
@@ -19,6 +18,7 @@ class GUI_choice_team(Ui_choice_team_form, LoggerSuper):
         for col in range(1, self.tbl.columnCount()):
             self.tbl.item(0, col).setFont(QFont("Consolas", 14, QFont.Bold))
             self.tbl.item(0, col).setTextAlignment(Qt.AlignCenter | Qt.AlignCenter)
+
 
 class ChoiceTeamWindow(QDialog):
     logger = logging.getLogger('Choice_team_form')
@@ -55,7 +55,6 @@ class ChoiceTeamWindow(QDialog):
         self.ui.tbl.setColumnWidth(2, 100)
         self.ui.tbl.setColumnWidth(3, 150)
         self.ui.tbl.horizontalHeader().setSectionResizeMode(2, QHeaderView.Stretch)
-        self.ui.set_table_header_style()
 
     def fill_table(self):
         self.ui.tbl.setRowCount(len(self.teams) + 1)

@@ -23,11 +23,6 @@ class GUI_Login_Window(Ui_Login, LoggerSuper):
         window.setMaximumSize(width, hight)
         window.resize(width, hight)
 
-    def set_table_header_style(self):
-        self.tbl.item(0, 0).setFont(QFont("Consolas", 18, QFont.Bold))
-        for col in range(1, self.tbl.columnCount()):
-            self.tbl.item(0, col).setFont(QFont("Consolas", 14, QFont.Bold))
-            self.tbl.item(0, col).setTextAlignment(Qt.AlignCenter | Qt.AlignCenter)
 
 class CreateTeamWindow(QDialog):
     def __init__(self, db, parent = None):

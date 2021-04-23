@@ -23,11 +23,6 @@ class GUI_Login_Window(Ui_team_list, LoggerSuper):
         window.resize(width, hight)
         self.init_GUI = True
 
-    def set_table_header_style(self):
-        self.team_list_tbl.item(0, 0).setFont(QFont("Consolas", 18, QFont.Bold))
-        for col in range(1, self.team_list_tbl.columnCount()):
-            self.team_list_tbl.item(0, col).setFont(QFont("Consolas", 14, QFont.Bold))
-            self.team_list_tbl.item(0, col).setTextAlignment(Qt.AlignCenter | Qt.AlignCenter)
 
 class TeamListWindow(QDialog):
     def __init__(self, db, parent = None):
