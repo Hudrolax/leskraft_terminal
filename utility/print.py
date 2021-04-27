@@ -1,6 +1,8 @@
 from sys import platform
 import subprocess
-if not (platform == "linux" or platform == "linux2"):
+if platform == "linux" or platform == "linux2":
+    import cups
+else:
     from PDFNetPython3.PDFNetPython import *
 import os
 if __name__ != '__main__':
@@ -8,7 +10,6 @@ if __name__ != '__main__':
 import logging
 import requests
 from time import sleep
-from PyQt5 import QtCore
 
 
 def _get_http_data_static(route, parameters=''):
