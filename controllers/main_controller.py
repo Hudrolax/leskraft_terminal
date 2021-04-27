@@ -139,11 +139,11 @@ class RFIF_Scanner_Handler(QtCore.QObject, COM_port, LoggerSuper):
                     continue
                 if str_buffer.startswith('#F'+self.id) and len(str_buffer) == 14:
                     buffer = b''
-                    str_buffer = str_buffer.replace('#F'+self.id+'2D00', '')
+                    h_code = str_buffer[-8:]
                     try:
-                        card_id =  int(str_buffer, 16)
+                        card_id =  int(h_code, 16)
                     except Exception as e:
-                        self.logger.error(f'decode to int error "{str_buffer}"')
+                        self.logger.error(f'decode to int error "{h_code}". buffer is {str_buffer}')
                         continue
                     card_id = str(card_id)
                     self.logger.debug(f'get RFID code {card_id}')

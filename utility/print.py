@@ -1,7 +1,6 @@
 from sys import platform
-if platform == "linux" or platform == "linux2":
-    import cups
-else:
+import subprocess
+if not (platform == "linux" or platform == "linux2"):
     from PDFNetPython3.PDFNetPython import *
 import os
 if __name__ != '__main__':
@@ -46,12 +45,13 @@ def get_pdf_and_print(link):
 def print_file(path):
     if os.path.exists(path):
         if platform == "linux" or platform == "linux2" or platform == "darwin":
-            conn = cups.Connection()
-            conn.printFile(PRINTER_NAME, path, "", {})
+            # conn = cups.Connection()
+            # conn.printFile(PRINTER_NAME, path, "", {})
+            result = subprocess.run(["lp", "-d", PRINTER_NAME, path])
         else:
             win32_print(path)
-        # sleep(3)
-        QtCore.QThread.msleep(3000)
+        sleep(3)
+        # QtCore.QThread.msleep(3000)
         os.remove(path)
         logging.info(f'Файл {path} отправлен на печать и удален.')
     else:
