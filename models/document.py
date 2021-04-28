@@ -3,7 +3,6 @@ from utility.util import value_filled
 from utility.util import DATE_FORMAT
 from utility.util import DATE_FORMAT_1C
 from datetime import datetime
-from utility.print import get_pdf_and_print
 import logging
 
 
@@ -37,7 +36,7 @@ class DocumentTableString:
 class Document:
     logger = logging.getLogger('document')
 
-    def __init__(self, link, num, date, date_sending, type, storage, status, execute_to, team_leader, team_number, team_date, start_time, end_time, destination, autos_number):
+    def __init__(self, link, num, date, date_sending, type, storage, status, execute_to, team_leader, team_number, team_date, start_time, end_time, destination, autos_number, printed):
         """
         :param link: тип строка. Цифровое представление ссылки на документ (как в QR коде)
         :param num: тип строка. Номер документа.
@@ -70,7 +69,7 @@ class Document:
         self._end_time = date_setter(end_time)
         self.destination = destination
         self.autos_number = autos_number
-        # self.table = None
+        self.printed = printed
 
     @staticmethod
     def return_date_str(date):

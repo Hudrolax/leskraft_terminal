@@ -19,19 +19,20 @@ def _get_http_data_static(route, parameters=''):
         if answer.status_code == 200:
             return answer.content
         else:
-            MainModel.logger.error(f'http_get {route} status code {answer.status_code}:{answer.content.decode()}')
-            return None
-    except Exception as e:
+            logging.error(f'http_get {route} status code {answer.status_code}:{answer.content.decode()}')
+            raise Exception(f'ошибка получения файла {route}')
+    except Exception as ex:
+        logging.error(ex)
         try:
             answer = requests.get(f'http://{SERVER2}/{BASE_NAME}{route}?api_key={API_KEY}{parameters}',
                                   auth=(USER, PASSWORD))
             if answer.status_code == 200:
                 return answer.content
             else:
-                MainModel.logger.error(f'http_get {route} status code {answer.status_code}:{answer.content.decode()}')
-                return None
+                logging.error(f'http_get {route} status code {answer.status_code}:{answer.content.decode()}')
+                raise Exception(f'ошибка получения файла {route}')
         except:
-            return None
+            raise Exception(f'ошибка получения файла {route}')
 
 def get_pdf_and_print(link):
     file_path = f'./temp/{link}.pdf'
@@ -40,8 +41,8 @@ def get_pdf_and_print(link):
         with open(file_path, 'wb') as f:
             f.write(content)
         print_file(file_path)
-    except:
-        logging.critical(f'Ошибка записи файла {file_path}')
+    except Exception as ex:
+        logging.critical(ex)
 
 def print_file(path):
     if os.path.exists(path):

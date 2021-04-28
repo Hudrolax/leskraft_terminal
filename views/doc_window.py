@@ -1,6 +1,5 @@
 from views.ui.doc_form_ui import Ui_doc_form
-from PyQt5.QtGui import QFont
-from PyQt5.QtCore import Qt, pyqtSlot
+from PyQt5.QtCore import Qt
 from PyQt5.QtWidgets import QDialog, QApplication, QTableWidgetItem, QAbstractItemView
 from PyQt5 import QtCore
 from utility.logger_super import LoggerSuper

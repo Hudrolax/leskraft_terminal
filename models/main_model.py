@@ -6,6 +6,7 @@ from env import *
 import logging
 from config import AUTO_UPDATE_TIME, CONNECTION_TIMEOUT
 from PyQt5 import QtCore
+from utility.print import get_pdf_and_print
 
 # класс для заполнения БД в отдельном потоке
 class DBUpdateHandler(QtCore.QObject, LoggerSuper):
@@ -48,7 +49,8 @@ class DBUpdateHandler(QtCore.QObject, LoggerSuper):
             args.append(json_doc.get('end_time'))
             args.append(json_doc.get('destination'))
             args.append(json_doc.get('autos_number'))
-            self.db.add_document(*args)
+            args.append(json_doc.get('printed'))
+            doc = self.db.add_document(*args)
             _table = json_doc.get('table')
             for json_str in _table:
                 args_str = []
@@ -67,6 +69,12 @@ class DBUpdateHandler(QtCore.QObject, LoggerSuper):
                 args_str.append(json_str.get('cancelled'))
                 args_str.append(json_str.get('reason_for_cancellation'))
                 self.db.add_doc_table_string(*args_str)
+            self.check_and_print(doc)
+
+    def check_and_print(self, doc):
+        if not doc.printed:
+            get_pdf_and_print(doc.link)
+            doc.printed = True
 
     def _get_employees(self, decoded_json):
         json_records = decoded_json.get('employees')

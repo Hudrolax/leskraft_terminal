@@ -44,8 +44,10 @@ class DB(LoggerSuper):
     def add_nomenclature(self, code, name):
         self._nomenclature.append(Nomenclature(code, name))
 
-    def add_document(self, link, num, date, date_sending, type, storage, status, execute_to, team_leader, team_number, team_date, start_time, end_time, destination, autos_number):
-        self._documents.append(Document(link, num, date, date_sending, type, storage, status, execute_to, team_leader, team_number, team_date, start_time, end_time, destination, autos_number))
+    def add_document(self, *args):
+        doc = Document(*args)
+        self._documents.append(doc)
+        return doc
 
     def add_doc_table_string(self, doc_link, num, nomenclature_code, amount, status, adress_shelf, adress_floor, cancelled, reason_for_cancellation):
         _nomenclature = self.get_nomenclature(nomenclature_code)

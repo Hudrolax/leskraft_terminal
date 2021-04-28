@@ -1,5 +1,4 @@
 from views.ui.create_team_ui import Ui_Login
-from PyQt5.QtGui import QFont
 from PyQt5.QtCore import Qt
 from PyQt5.QtWidgets import QApplication, QDialog, QTableWidgetItem, QPushButton
 from PyQt5 import QtCore
