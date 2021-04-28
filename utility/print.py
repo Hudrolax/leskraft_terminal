@@ -52,8 +52,7 @@ def print_file(path):
         else:
             win32_print(path)
         sleep(3)
-        # QtCore.QThread.msleep(3000)
-        os.remove(path)
+        # os.remove(path)
         logging.info(f'Файл {path} отправлен на печать и удален.')
     else:
         logging.error(f'Не найден файл для печати {path}')
