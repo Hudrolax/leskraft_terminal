@@ -45,7 +45,7 @@ class MainController:
         if self.main_window.model.db.get_doc(code) is not None:
             self.open_document_window(code)
         else:
-            self.show_message_with_timer(f'Документ не найден. Возможно вы осканировали не ту бумагу.')
+            self.show_message_with_timer('Документ не найден. Возможно вы осканировали не ту бумагу.')
 
     def show_message_with_timer(self, message, color='#960E10', font_size='24'):
         self.main_window._show_error_message(message, color, font_size)

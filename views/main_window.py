@@ -148,8 +148,7 @@ class MainWindow(QMainWindow):
             self._show_connection_error_flag = False
 
     def _show_error_message(self, message, color='#FF0000', font=24):
-        self.ui.error_label.setStyleSheet(f'color: {color}')
-        self.ui.error_label.setFont(QFont("Consolas", font, QFont.Bold))
+        self.ui.error_label.setStyleSheet(f'color: {color}; font: bold {font}pt "Consolas";')
         self.ui.error_label.setText(message)
         self.ui.error_widget.setVisible(True)
 
