@@ -86,7 +86,6 @@ class DocForm_controller(LoggerSuper):
             self.show_message_with_timer('Задание отправлено на принтер!', color='green')
         except:
             self.show_message_with_timer('Ошибка связи с сервером, попробуйте еще раз!', color='red')
-            self.window.enable_print_btn()
 
         # # Создадим и запустим поток печати файла
         # self.print_thread = QtCore.QThread()
