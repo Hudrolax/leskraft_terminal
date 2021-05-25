@@ -135,3 +135,7 @@ class DocumentWindow(QDialog):
     def disable_print_btn(self):
         self.ui.printButton.setEnabled(False)
         self.ui.printButton.setStyleSheet('background-color: #87939A;') # grey btn
+
+    def enable_print_btn(self):
+        self.ui.printButton.setEnabled(True)
+        self.ui.printButton.setStyleSheet('background-color: #769782;') # green btn

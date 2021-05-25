@@ -23,15 +23,13 @@ def _get_http_data_static(route, parameters=''):
             raise Exception(f'ошибка получения файла {route}')
     except Exception as ex:
         logging.error(ex)
-        try:
-            answer = requests.get(f'http://{SERVER2}/{BASE_NAME}{route}?api_key={API_KEY}{parameters}',
-                                  auth=(USER, PASSWORD))
-            if answer.status_code == 200:
-                return answer.content
-            else:
-                logging.error(f'http_get {route} status code {answer.status_code}:{answer.content.decode()}')
-                raise Exception(f'ошибка получения файла {route}')
-        except:
+
+        answer = requests.get(f'http://{SERVER2}/{BASE_NAME}{route}?api_key={API_KEY}{parameters}',
+                              auth=(USER, PASSWORD))
+        if answer.status_code == 200:
+            return answer.content
+        else:
+            logging.error(f'http_get {route} status code {answer.status_code}:{answer.content.decode()}')
             raise Exception(f'ошибка получения файла {route}')
 
 def get_pdf_and_print(link):
@@ -43,6 +41,7 @@ def get_pdf_and_print(link):
         print_file(file_path)
     except Exception as ex:
         logging.critical(ex)
+        raise ex
 
 def print_file(path):
     if os.path.exists(path):

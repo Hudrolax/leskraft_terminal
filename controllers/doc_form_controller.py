@@ -81,14 +81,19 @@ class DocForm_controller(LoggerSuper):
 
     def click_print_btn(self):
         self.window.disable_print_btn()
-        self.show_message_with_timer('Задание отправлено на принтер!', color='green')
+        try:
+            get_pdf_and_print(self.window.model.doc_link)
+            self.show_message_with_timer('Задание отправлено на принтер!', color='green')
+        except:
+            self.show_message_with_timer('Ошибка связи с сервером, попробуйте еще раз!', color='red')
+            self.window.enable_print_btn()
 
-        # Создадим и запустим поток печати файла
-        self.print_thread = QtCore.QThread()
-        self.print_handler = Print_Handler()
-        self.print_handler.moveToThread(self.print_thread)
-        self.print_thread.started.connect(lambda: self.print_handler.run(self.window.model.doc_link))
-        self.print_thread.start()
+        # # Создадим и запустим поток печати файла
+        # self.print_thread = QtCore.QThread()
+        # self.print_handler = Print_Handler()
+        # self.print_handler.moveToThread(self.print_thread)
+        # self.print_thread.started.connect(lambda: self.print_handler.run(self.window.model.doc_link))
+        # self.print_thread.start()
 
     def close_window(self):
         self.window.close()
@@ -96,7 +101,7 @@ class DocForm_controller(LoggerSuper):
         self.window.main_window.controller.connect_scanners_to_main_form()
         self.window.main_window.controller.create_team_window = None
 
-# класс для печати в отдельном потоке
-class Print_Handler(QtCore.QObject):
-    def run(self, doc_link):
-        get_pdf_and_print(doc_link)
+# # класс для печати в отдельном потоке
+# class Print_Handler(QtCore.QObject):
+#     def run(self, doc_link):
+#         get_pdf_and_print(doc_link)
