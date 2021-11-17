@@ -134,7 +134,7 @@ class DBUpdateHandler(QtCore.QObject, LoggerSuper):
         except Exception as e:
             self.db.online = False
             self.logger.error(e)
-            QtCore.QThread.msleep(3000)
+            QtCore.QThread.msleep(1000)
 
     @staticmethod
     def get_http_data_static(route, parameters=''):
