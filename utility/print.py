@@ -14,7 +14,8 @@ from time import sleep
 
 def _get_http_data_static(route, parameters=''):
     try:
-        answer = requests.get(f'http://{SERVER}/{BASE_NAME}{route}?api_key={API_KEY}{parameters}',
+        # answer = requests.get(f'http://{SERVER}/{BASE_NAME}{route}?api_key={API_KEY}{parameters}',
+        answer = requests.get(f'http://{SERVER}/{BASE_NAME}{route}{parameters}',
                               auth=(USER, PASSWORD), timeout=10)
         if answer.status_code == 200:
             return answer.content
@@ -24,7 +25,8 @@ def _get_http_data_static(route, parameters=''):
     except Exception as ex:
         logging.error(ex)
 
-        answer = requests.get(f'http://{SERVER2}/{BASE_NAME}{route}?api_key={API_KEY}{parameters}',
+        # answer = requests.get(f'http://{SERVER2}/{BASE_NAME}{route}?api_key={API_KEY}{parameters}',
+        answer = requests.get(f'http://{SERVER2}/{BASE_NAME}{route}{parameters}',
                               auth=(USER, PASSWORD), timeout=3)
         if answer.status_code == 200:
             return answer.content
@@ -34,7 +36,7 @@ def _get_http_data_static(route, parameters=''):
 
 def get_pdf_and_print(link):
     file_path = f'./temp/{link}.pdf'
-    content = _get_http_data_static(GET_PRINT_FORM_ROUTE, f'&document_id={link}')
+    content = _get_http_data_static(GET_PRINT_FORM_ROUTE, f'?document_id={link}')
     try:
         with open(file_path, 'wb') as f:
             f.write(content)
