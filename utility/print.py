@@ -15,7 +15,7 @@ from time import sleep
 def _get_http_data_static(route, parameters=''):
     try:
         answer = requests.get(f'http://{SERVER}/{BASE_NAME}{route}?api_key={API_KEY}{parameters}',
-                              auth=(USER, PASSWORD), timeout=3)
+                              auth=(USER, PASSWORD), timeout=10)
         if answer.status_code == 200:
             return answer.content
         else:
