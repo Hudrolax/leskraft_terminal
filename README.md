@@ -8,6 +8,8 @@ sudo apt-get install -y git zip unzip vim mc tmux wget htop python3-pyqt5
 sudo passwd root
 ```
 настройки терминала в файле env.py
+Если файла нет, то он получается путем копирования env.py.demo в env.py
+В настройках надо задать адреса, логин для HTTP сервиса, пароль, зашифрованный пароль в base64 и имя базы
 
 ## Установка cups (сервера печати):
 ```
