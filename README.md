@@ -123,7 +123,7 @@ sudo vim /home/pi/lkterminal/env.py
 ```
 Посмотреть доступные сетевые принтеры:
 ```
-python3 /utility/print.py #
+python3 /utility/print.py
 ```
 Имя нужного надо вписать в env.py
 Если скрипт выдаст ошибку: установить CUPS, нужные зависимости
